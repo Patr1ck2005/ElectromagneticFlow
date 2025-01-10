@@ -1,0 +1,11 @@
+/.idea
+/out
+/gwt-unitCache
+/war/images
+/war/ripple
+/war/WEB-INF/classes
+/war/WEB-INF/deploy
+/war/WEB-INF/lib
+
+
+ripplegl.iml

@@ -757,6 +757,7 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
     	mainMenuBar.addItem(getClassCheckItem("Add Moving Source", "MovingSource"));
     	mainMenuBar.addItem(getClassCheckItem("Add Cavity", "Cavity"));
     	mainMenuBar.addItem(getClassCheckItem("Add Medium", "MediumBox"));
+    	mainMenuBar.addItem(getClassCheckItem("Add TemporalCrystal", "TemporalCrystalMediumBox"));
     	mainMenuBar.addItem(getClassCheckItem("Add Mode Box", "ModeBox"));
     	mainMenuBar.addItem(getClassCheckItem("Add Gradient", "GradientBox"));
     	mainMenuBar.addItem(getClassCheckItem("Add Ellipse", "Ellipse"));
@@ -832,12 +833,15 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
     	if (item == "rotate" && selectedObject != null && selectedObject.canRotate())
     		rotationMode = true;
     	DragObject newObject = null;
-    	if (item == "Wall")
+    	if (item.equals("Wall"))
     		newObject = new Wall();
     	if (item == "Box")
     		newObject = new Box();
     	if (item == "MediumBox")
     		newObject = new MediumBox();
+		// 在创建对象部分添加 TemporalCrystalMediumBox
+		if (item.equals("TemporalCrystalMediumBox"))
+			newObject = new TemporalCrystalMediumBox();
     	if (item == "GradientBox")
     		newObject = new GradientBox();
     	if (item == "Cavity")
@@ -915,6 +919,7 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
     	if (tint == 203) return new Slit(st);
     	if (tint == 202) return new SolidBox(st);
     	if (tint == 's') return new Source(st, 1);
+		if (tint == 'T') return new TemporalCrystalMediumBox(st); // 添加这一行
     	if (tint == 't') return new TrianglePrism(st);
     	if (tint == 'w') return new Wall(st);
     	if (tint == 204) return new RotatingSource(st);

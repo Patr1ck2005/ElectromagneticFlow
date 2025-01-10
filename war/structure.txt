@@ -1,0 +1,302 @@
+卷 Files 的文件夹 PATH 列表
+卷序列号为 8EEB-A603
+D:.
+│  glMatrix-0.9.5.min.js
+│  Ripple.css
+│  Ripple.html
+│  ripple.js
+│  shortrelay.php
+│  structure.txt
+│  webgl-utils.js
+│  
+├─images
+│      cancel_16.png
+│      min-4panel.png
+│      x-2panel.png
+│      
+├─ripple
+│  │  .DS_Store
+│  │  82E5FF563B0286BD9BEA4FD6A3007B4B.cache.js
+│  │  B3CFD654D006985CDE182DF1375A1569.cache.js
+│  │  clear.cache.gif
+│  │  compilation-mappings.txt
+│  │  ripple.devmode.js
+│  │  ripple.nocache.js
+│  │  setuplist.txt
+│  │  
+│  ├─examples
+│  │      01modes.txt
+│  │      0nmodes.txt
+│  │      11modes.txt
+│  │      12pole.txt
+│  │      1nmodecombos.txt
+│  │      1nmodes.txt
+│  │      1slit.txt
+│  │      1source.txt
+│  │      2slit.txt
+│  │      2sources.txt
+│  │      3slit.txt
+│  │      4sources.txt
+│  │      bandstop1.txt
+│  │      bandstop2.txt
+│  │      bandstop3.txt
+│  │      beats.txt
+│  │      bigmode.txt
+│  │      blens.txt
+│  │      circle.txt
+│  │      circprism.txt
+│  │      coating.txt
+│  │      coupledcav.txt
+│  │      dipole.txt
+│  │      doppler1.txt
+│  │      doppler2.txt
+│  │      duct.txt
+│  │      ellipse.txt
+│  │      gradient1.txt
+│  │      gradient2.txt
+│  │      gradient3.txt
+│  │      gradient4.txt
+│  │      halfplane.txt
+│  │      hex.txt
+│  │      highpass1.txt
+│  │      highpass2.txt
+│  │      internal.txt
+│  │      interplane.txt
+│  │      linquad.txt
+│  │      lloyd.txt
+│  │      lowpass1.txt
+│  │      lowpass2.txt
+│  │      medium.txt
+│  │      nnmodecombos.txt
+│  │      nnmodes.txt
+│  │      nnmodesacoustic.txt
+│  │      obstacle.txt
+│  │      oct.txt
+│  │      paramirror1.txt
+│  │      paramirror2.txt
+│  │      phasearray1.txt
+│  │      phasearray2.txt
+│  │      phasearray3.txt
+│  │      piston.txt
+│  │      plane.txt
+│  │      plens.txt
+│  │      porro.txt
+│  │      pyramid.txt
+│  │      quad.txt
+│  │      raprism.txt
+│  │      reciprocity.txt
+│  │      refraction.txt
+│  │      rescav1.txt
+│  │      rescav2.txt
+│  │      roomres.txt
+│  │      rotating.txt
+│  │      scatter.txt
+│  │      sonicboom.txt
+│  │      waveguides1.txt
+│  │      waveguides2.txt
+│  │      waveguides3.txt
+│  │      waveguides4.txt
+│  │      waveguides5.txt
+│  │      zonee.txt
+│  │      zoneo.txt
+│  │      
+│  └─gwt
+│      └─clean
+│          │  clean.css
+│          │  clean_rtl.css
+│          │  
+│          └─images
+│                  circles.png
+│                  corner.png
+│                  hborder.png
+│                  thumb_horz.png
+│                  thumb_vertical.png
+│                  vborder.png
+│                  
+└─WEB-INF
+    │  web.xml
+    │  
+    ├─classes
+    │  └─com
+    │      └─falstad
+    │          └─ripple
+    │              │  Ripple.gwt.xml
+    │              │  
+    │              ├─client
+    │              │      AboutBox$1.class
+    │              │      AboutBox.class
+    │              │      Applets$1.class
+    │              │      Applets.class
+    │              │      Box.class
+    │              │      Cavity.class
+    │              │      Checkbox.class
+    │              │      Choice.class
+    │              │      Color.class
+    │              │      Dimension.class
+    │              │      DragHandle.class
+    │              │      DragObject.class
+    │              │      Editable.class
+    │              │      EditDialog$1.class
+    │              │      EditDialog$2.class
+    │              │      EditDialog$3.class
+    │              │      EditDialog$4.class
+    │              │      EditDialog$5.class
+    │              │      EditDialog$6.class
+    │              │      EditDialog$7.class
+    │              │      EditDialog.class
+    │              │      EditInfo.class
+    │              │      EditOptions.class
+    │              │      Ellipse.class
+    │              │      ExportAsLocalFileDialog$1.class
+    │              │      ExportAsLocalFileDialog.class
+    │              │      ExportAsTextDialog$1.class
+    │              │      ExportAsTextDialog$2.class
+    │              │      ExportAsTextDialog.class
+    │              │      ExportAsUrlDialog$1.class
+    │              │      ExportAsUrlDialog$2.class
+    │              │      ExportAsUrlDialog$3.class
+    │              │      ExportAsUrlDialog.class
+    │              │      Font.class
+    │              │      GradientBox.class
+    │              │      Graphics.class
+    │              │      ImportFromTextDialog$1.class
+    │              │      ImportFromTextDialog$2.class
+    │              │      ImportFromTextDialog.class
+    │              │      Lens.class
+    │              │      LineSource.class
+    │              │      LoadFile.class
+    │              │      MediumBox.class
+    │              │      MediumEllipse.class
+    │              │      ModeBox.class
+    │              │      MovingSource.class
+    │              │      MovingWall.class
+    │              │      MultipoleSource.class
+    │              │      MyCommand.class
+    │              │      Parabola.class
+    │              │      PhasedArraySource.class
+    │              │      Point.class
+    │              │      Polygon.class
+    │              │      Probe.class
+    │              │      ProbeView$ProbeCommand.class
+    │              │      ProbeView.class
+    │              │      QueryParameters.class
+    │              │      Rectangle.class
+    │              │      RectDragObject.class
+    │              │      RippleSim$1.class
+    │              │      RippleSim$2.class
+    │              │      RippleSim$3.class
+    │              │      RippleSim$4.class
+    │              │      RippleSim$5.class
+    │              │      RippleSim$FileSetup.class
+    │              │      RippleSim$Setup.class
+    │              │      RippleSim.class
+    │              │      RotatingSource.class
+    │              │      SaveRecordingBufferDialog$1.class
+    │              │      SaveRecordingBufferDialog.class
+    │              │      Scrollbar.class
+    │              │      Slit.class
+    │              │      SolidBox.class
+    │              │      Source.class
+    │              │      StringTokenizer.class
+    │              │      TrianglePrism.class
+    │              │      Wall.class
+    │              │      WindowBox$1.class
+    │              │      WindowBox$2.class
+    │              │      WindowBox.class
+    │              │      
+    │              ├─public
+    │              │  │  setuplist.txt
+    │              │  │  
+    │              │  └─examples
+    │              │          01modes.txt
+    │              │          0nmodes.txt
+    │              │          11modes.txt
+    │              │          12pole.txt
+    │              │          1nmodecombos.txt
+    │              │          1nmodes.txt
+    │              │          1slit.txt
+    │              │          1source.txt
+    │              │          2slit.txt
+    │              │          2sources.txt
+    │              │          3slit.txt
+    │              │          4sources.txt
+    │              │          bandstop1.txt
+    │              │          bandstop2.txt
+    │              │          bandstop3.txt
+    │              │          beats.txt
+    │              │          bigmode.txt
+    │              │          blens.txt
+    │              │          circle.txt
+    │              │          circprism.txt
+    │              │          coating.txt
+    │              │          coupledcav.txt
+    │              │          dipole.txt
+    │              │          doppler1.txt
+    │              │          doppler2.txt
+    │              │          duct.txt
+    │              │          ellipse.txt
+    │              │          gradient1.txt
+    │              │          gradient2.txt
+    │              │          gradient3.txt
+    │              │          gradient4.txt
+    │              │          halfplane.txt
+    │              │          hex.txt
+    │              │          highpass1.txt
+    │              │          highpass2.txt
+    │              │          internal.txt
+    │              │          interplane.txt
+    │              │          linquad.txt
+    │              │          lloyd.txt
+    │              │          lowpass1.txt
+    │              │          lowpass2.txt
+    │              │          medium.txt
+    │              │          nnmodecombos.txt
+    │              │          nnmodes.txt
+    │              │          nnmodesacoustic.txt
+    │              │          obstacle.txt
+    │              │          oct.txt
+    │              │          paramirror1.txt
+    │              │          paramirror2.txt
+    │              │          phasearray1.txt
+    │              │          phasearray2.txt
+    │              │          phasearray3.txt
+    │              │          piston.txt
+    │              │          plane.txt
+    │              │          plens.txt
+    │              │          porro.txt
+    │              │          pyramid.txt
+    │              │          quad.txt
+    │              │          raprism.txt
+    │              │          reciprocity.txt
+    │              │          refraction.txt
+    │              │          rescav1.txt
+    │              │          rescav2.txt
+    │              │          roomres.txt
+    │              │          rotating.txt
+    │              │          scatter.txt
+    │              │          sonicboom.txt
+    │              │          waveguides1.txt
+    │              │          waveguides2.txt
+    │              │          waveguides3.txt
+    │              │          waveguides4.txt
+    │              │          waveguides5.txt
+    │              │          zonee.txt
+    │              │          zoneo.txt
+    │              │          
+    │              └─shared
+    │                      FieldVerifier.class
+    │                      
+    ├─deploy
+    │  └─ripple
+    │      ├─rpcPolicyManifest
+    │      │      manifest.txt
+    │      │      
+    │      └─symbolMaps
+    │              82E5FF563B0286BD9BEA4FD6A3007B4B.symbolMap
+    │              B3CFD654D006985CDE182DF1375A1569.symbolMap
+    │              
+    └─lib
+            gwt-dev.jar
+            gwt-servlet.jar
+            gwt-user.jar
+            
