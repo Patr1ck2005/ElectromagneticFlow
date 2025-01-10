@@ -7,14 +7,11 @@ public class PhotonicCrystal extends MediumBox {
     // 矩形阵列的行数和列数
     int rows, cols;
 
-    // 编辑信息对象，用于更新界面
-    EditInfo speedIndex1EditInfo, speedIndex2EditInfo, rowsEditInfo, colsEditInfo;
-
     // 默认构造函数
     public PhotonicCrystal() {
         super();
-        this.speedIndex = MediumBox.getRefractiveIndex(1.5); // 默认折射率 v1 = 1.5
-        this.speedIndex2 = MediumBox.getRefractiveIndex(2.0); // 默认折射率 v2 = 2.0
+        this.speedIndex = MediumBox.getSpeedIndex(1.5); // 默认折射率 v1 = 1.5
+        this.speedIndex2 = MediumBox.getSpeedIndex(2.0); // 默认折射率 v2 = 2.0
         this.rows = 5; // 默认5行
         this.cols = 5; // 默认5列
     }
@@ -31,8 +28,8 @@ public class PhotonicCrystal extends MediumBox {
     // 通过坐标创建对象的构造函数
     public PhotonicCrystal(int x, int y, int x2, int y2) {
         super(x, y, x2, y2);
-        this.speedIndex = MediumBox.getRefractiveIndex(1.5); // 默认折射率 v1 = 1.5
-        this.speedIndex2 = MediumBox.getRefractiveIndex(2.0); // 默认折射率 v2 = 2.0
+        this.speedIndex = MediumBox.getSpeedIndex(1.5); // 默认折射率 v1 = 1.5
+        this.speedIndex2 = MediumBox.getSpeedIndex(2.0); // 默认折射率 v2 = 2.0
         this.rows = 5; // 默认5行
         this.cols = 5; // 默认5列
     }
@@ -54,11 +51,8 @@ public class PhotonicCrystal extends MediumBox {
                 double cellTopLeftX_d = topLeft.x + col * cellWidth;
                 double cellTopLeftY_d = topLeft.y + row * cellHeight;
                 double cellTopRightX_d = cellTopLeftX_d + cellWidth;
-                double cellTopRightY_d = cellTopLeftY_d;
-                double cellBottomLeftX_d = cellTopLeftX_d;
                 double cellBottomLeftY_d = cellTopLeftY_d + cellHeight;
-                double cellBottomRightX_d = cellTopRightX_d;
-                double cellBottomRightY_d = cellTopRightY_d + cellHeight;
+                double cellBottomRightY_d = cellTopLeftY_d + cellHeight;
 
                 // 根据行列位置决定使用哪种折射率（例如，棋盘格模式）
                 double currentSpeedIndex = ((row + col) % 2 == 0) ? speedIndex : speedIndex2;
@@ -67,10 +61,10 @@ public class PhotonicCrystal extends MediumBox {
                 int cellTopLeftX = (int) Math.round(cellTopLeftX_d);
                 int cellTopLeftY = (int) Math.round(cellTopLeftY_d);
                 int cellTopRightX = (int) Math.round(cellTopRightX_d);
-                int cellTopRightY = (int) Math.round(cellTopRightY_d);
-                int cellBottomLeftX = (int) Math.round(cellBottomLeftX_d);
+                int cellTopRightY = (int) Math.round(cellTopLeftY_d);
+                int cellBottomLeftX = (int) Math.round(cellTopLeftX_d);
                 int cellBottomLeftY = (int) Math.round(cellBottomLeftY_d);
-                int cellBottomRightX = (int) Math.round(cellBottomRightX_d);
+                int cellBottomRightX = (int) Math.round(cellTopRightX_d);
                 int cellBottomRightY = (int) Math.round(cellBottomRightY_d);
 
                 // 绘制当前子矩形
@@ -109,12 +103,12 @@ public class PhotonicCrystal extends MediumBox {
     public void setEditValue(int n, EditInfo ei) {
         if (n == 0) {
             // 设置第一种折射率
-            speedIndex = MediumBox.getRefractiveIndex(ei.value);
+            speedIndex = MediumBox.getSpeedIndex(ei.value);
             ei.value = Math.sqrt(1 / speedIndex);
             EditDialog.theEditDialog.updateValue(ei);
         } else if (n == 1) {
             // 设置第二种折射率
-            speedIndex2 = MediumBox.getRefractiveIndex(ei.value);
+            speedIndex2 = MediumBox.getSpeedIndex(ei.value);
             ei.value = Math.sqrt(1 / speedIndex2);
             EditDialog.theEditDialog.updateValue(ei);
         } else if (n == 2) {

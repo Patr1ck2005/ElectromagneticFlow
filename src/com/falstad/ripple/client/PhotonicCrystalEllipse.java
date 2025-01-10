@@ -8,13 +8,10 @@ public class PhotonicCrystalEllipse extends PhotonicCrystal {
     // 椭圆的长轴和短轴长度（以像素为单位）
     private int ellipseMajorAxis, ellipseMinorAxis;
 
-    // 编辑信息对象，用于更新界面
-    private EditInfo speedIndexHoleEditInfo, ellipseMajorAxisEditInfo, ellipseMinorAxisEditInfo;
-
     // 默认构造函数
     public PhotonicCrystalEllipse() {
         super();
-        this.speedIndexHole = MediumBox.getRefractiveIndex(2.0); // 默认孔洞折射率 v2 = 2.0
+        this.speedIndexHole = MediumBox.getSpeedIndex(2.0); // 默认孔洞折射率 v2 = 2.0
         this.ellipseMajorAxis = 30; // 默认长轴长度10像素
         this.ellipseMinorAxis = 30;  // 默认短轴长度5像素
     }
@@ -30,23 +27,22 @@ public class PhotonicCrystalEllipse extends PhotonicCrystal {
     // 通过坐标创建对象的构造函数
     public PhotonicCrystalEllipse(int x, int y, int x2, int y2) {
         super(x, y, x2, y2);
-        this.speedIndexHole = MediumBox.getRefractiveIndex(2.0); // 默认孔洞折射率 v2 = 2.0
+        this.speedIndexHole = MediumBox.getSpeedIndex(2.0); // 默认孔洞折射率 v2 = 2.0
         this.ellipseMajorAxis = 30; // 默认长轴长度10像素
         this.ellipseMinorAxis = 30;  // 默认短轴长度5像素
     }
 
     @Override
     void prepare() {
-        // 首先绘制整个区域的背景
         RippleSim.drawMedium(
-                (int) Math.round(topLeft.x),
-                (int) Math.round(topLeft.y),
-                (int) Math.round(topRight.x),
-                (int) Math.round(topRight.y),
-                (int) Math.round(bottomLeft.x),
-                (int) Math.round(bottomLeft.y),
-                (int) Math.round(bottomRight.x),
-                (int) Math.round(bottomRight.y),
+                topLeft.x,
+                topLeft.y,
+                topRight.x,
+                topRight.y,
+                bottomLeft.x,
+                bottomLeft.y,
+                bottomRight.x,
+                bottomRight.y,
                 speedIndex, speedIndex
         );
 
@@ -110,12 +106,12 @@ public class PhotonicCrystalEllipse extends PhotonicCrystal {
     public void setEditValue(int n, EditInfo ei) {
         if (n == 0) {
             // 设置第一种折射率
-            speedIndex = MediumBox.getRefractiveIndex(ei.value);
+            speedIndex = MediumBox.getSpeedIndex(ei.value);
             ei.value = Math.sqrt(1 / speedIndex);
             EditDialog.theEditDialog.updateValue(ei);
         } else if (n == 1) {
             // 设置第二种折射率
-            speedIndex2 = MediumBox.getRefractiveIndex(ei.value);
+            speedIndex2 = MediumBox.getSpeedIndex(ei.value);
             ei.value = Math.sqrt(1 / speedIndex2);
             EditDialog.theEditDialog.updateValue(ei);
         } else if (n == 2) {
@@ -128,7 +124,7 @@ public class PhotonicCrystalEllipse extends PhotonicCrystal {
             EditDialog.theEditDialog.updateValue(ei);
         } else if (n == 4) {
             // 设置孔洞折射率
-            speedIndexHole = MediumBox.getRefractiveIndex(ei.value);
+            speedIndexHole = MediumBox.getSpeedIndex(ei.value);
             ei.value = Math.sqrt(1 / speedIndexHole);
             EditDialog.theEditDialog.updateValue(ei);
         } else if (n == 5) {

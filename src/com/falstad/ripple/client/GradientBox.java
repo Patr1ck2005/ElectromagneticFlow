@@ -51,9 +51,9 @@ public class GradientBox extends RectDragObject {
     }
     public void setEditValue(int n, EditInfo ei) {
         if (n == 0)
-        	speedIndex = MediumBox.getRefractiveIndex(ei.value);
+        	speedIndex = MediumBox.getSpeedIndex(ei.value);
         if (n == 1)
-        	speedIndex2 = MediumBox.getRefractiveIndex(ei.value);
+        	speedIndex2 = MediumBox.getSpeedIndex(ei.value);
     }
 
 	int getDumpType() { return 'g'; }

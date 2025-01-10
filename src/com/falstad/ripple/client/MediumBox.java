@@ -58,15 +58,15 @@ public class MediumBox extends RectDragObject {
     }
     public void setEditValue(int n, EditInfo ei) {
         if (n == 0) {
-        	speedIndex = getRefractiveIndex(ei.value);
+        	speedIndex = getSpeedIndex(ei.value);
         	ei.value = Math.sqrt(1/speedIndex);
         	EditDialog.theEditDialog.updateValue(ei);
         }
     }
 
-    static double getRefractiveIndex(double v) {
-    	if (v < .5)
-    		v = .5;
+    static double getSpeedIndex(double v) {
+    	if (v < .85)
+    		v = .85;
     	if (v > 4)
     		v = 4;
     	return 1/(v*v);

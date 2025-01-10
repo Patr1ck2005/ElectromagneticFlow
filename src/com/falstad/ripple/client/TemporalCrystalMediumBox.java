@@ -45,16 +45,14 @@ public class TemporalCrystalMediumBox extends MediumBox {
         // 更新相位
         double phase = frequency*sim.t;
 
-        // 计算当前折射率
-        double dynamicRefractiveIndex = speedIndex + amplitude * Math.sin(phase);
-
-        // 可选：打印当前折射率以进行调试
-        // System.out.println("TemporalCrystalMediumBox refractiveIndex: " + dynamicRefractiveIndex);
+        // 计算当前速度指数
+        double dynamicEpsilon = Math.pow(1/speedIndex, 0.25) + amplitude * Math.sin(phase);
+        double dynamicSpeedIndex = 1/dynamicEpsilon/dynamicEpsilon;
 
         RippleSim.drawMedium(
                 topLeft.x, topLeft.y, topRight.x, topRight.y,
                 bottomLeft.x, bottomLeft.y, bottomRight.x, bottomRight.y,
-                dynamicRefractiveIndex, dynamicRefractiveIndex
+                dynamicSpeedIndex, dynamicSpeedIndex
         );
     }
 
@@ -66,7 +64,7 @@ public class TemporalCrystalMediumBox extends MediumBox {
     @Override
     public EditInfo getEditInfo(int n) {
         if (n == 0) {
-            return new EditInfo("Refractive Index (1-2)", Math.sqrt(1 / speedIndex), 0, 1)
+            return new EditInfo("Refractive Epsilon (1-2)", Math.pow(1/speedIndex, 0.25), 0, 1)
                     .setDimensionless();
         } else if (n == 1) {
             return new EditInfo("Amplitude", amplitude, 0, 1)
@@ -81,8 +79,7 @@ public class TemporalCrystalMediumBox extends MediumBox {
     @Override
     public void setEditValue(int n, EditInfo ei) {
         if (n == 0) {
-            speedIndex = getRefractiveIndex(ei.value);
-            ei.value = Math.sqrt(1 / speedIndex);
+            speedIndex = getSpeedIndex(ei.value*ei.value);
             EditDialog.theEditDialog.updateValue(ei);
         } else if (n == 1) {
             amplitude = ei.value;
@@ -92,14 +89,6 @@ public class TemporalCrystalMediumBox extends MediumBox {
             enforceMaxFrequency();
             EditDialog.theEditDialog.updateValue(ei);
         }
-    }
-
-    static double getRefractiveIndex(double v) {
-        if (v < 1)
-            v = 1;
-        if (v > 2)
-            v = 2;
-        return 1 / (v * v);
     }
 
     @Override
