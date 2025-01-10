@@ -65,10 +65,10 @@ public class MediumBox extends RectDragObject {
     }
 
     static double getRefractiveIndex(double v) {
-    	if (v < 1)
-    		v = 1;
-    	if (v > 2)
-    		v = 2;
+    	if (v < .5)
+    		v = .5;
+    	if (v > 4)
+    		v = 4;
     	return 1/(v*v);
     }
     

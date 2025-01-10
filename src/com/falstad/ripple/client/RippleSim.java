@@ -757,6 +757,8 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
     	mainMenuBar.addItem(getClassCheckItem("Add Moving Source", "MovingSource"));
     	mainMenuBar.addItem(getClassCheckItem("Add Cavity", "Cavity"));
     	mainMenuBar.addItem(getClassCheckItem("Add Medium", "MediumBox"));
+    	mainMenuBar.addItem(getClassCheckItem("Add PhotonicCrystal", "PhotonicCrystal"));
+    	mainMenuBar.addItem(getClassCheckItem("Add PhotonicCrystalEllipse", "PhotonicCrystalEllipse"));
     	mainMenuBar.addItem(getClassCheckItem("Add TemporalCrystal", "TemporalCrystalMediumBox"));
     	mainMenuBar.addItem(getClassCheckItem("Add Mode Box", "ModeBox"));
     	mainMenuBar.addItem(getClassCheckItem("Add Gradient", "GradientBox"));
@@ -839,7 +841,10 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
     		newObject = new Box();
     	if (item == "MediumBox")
     		newObject = new MediumBox();
-		// 在创建对象部分添加 TemporalCrystalMediumBox
+		if (item.equals("PhotonicCrystal"))
+			newObject = new PhotonicCrystal();
+		if (item.equals("PhotonicCrystalEllipse"))
+			newObject = new PhotonicCrystalEllipse();
 		if (item.equals("TemporalCrystalMediumBox"))
 			newObject = new TemporalCrystalMediumBox();
     	if (item == "GradientBox")
@@ -908,6 +913,9 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
     	if (tint == 'l') return new Lens(st);
     	if (tint == 'S') return new LineSource(st);
     	if (tint == 'm') return new MediumBox(st);
+    	if (tint == 'C') return new PhotonicCrystal(st);
+    	if (tint == 100) return new PhotonicCrystalEllipse(st);
+		if (tint == 'T') return new TemporalCrystalMediumBox(st); // 添加这一行
     	if (tint == 'E') return new MediumEllipse(st);
     	if (tint == 'M') return new ModeBox(st);
     	if (tint == 'd') return new MovingSource(st);
@@ -919,7 +927,6 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
     	if (tint == 203) return new Slit(st);
     	if (tint == 202) return new SolidBox(st);
     	if (tint == 's') return new Source(st, 1);
-		if (tint == 'T') return new TemporalCrystalMediumBox(st); // 添加这一行
     	if (tint == 't') return new TrianglePrism(st);
     	if (tint == 'w') return new Wall(st);
     	if (tint == 204) return new RotatingSource(st);
