@@ -185,24 +185,24 @@
 
 void main()
 {
-        highp float newvel = 0.;
-    	highp float newpos = 0.;
+        highp float newderivative = 0.;
+    	highp float newamplitude = 0.;
         highp vec4 pv = texture2D(uSampler, vTextureCoord);
         if (pv.b > 0.0) {
-                highp float pos = pv.r;
-                highp float vel = pv.g;
+                highp float amplitude = pv.r;
+                highp float derivative = pv.g;
                 highp float mid1 = getSquare(vec2(stepSizeX, 0.));
                 highp float mid2 = getSquare(vec2(-stepSizeX, 0.));
                 highp float mid3 = getSquare(vec2(0., stepSizeY));
                 highp float mid4 = getSquare(vec2(0., -stepSizeY));
                 highp float mid = .25*(mid1+mid2+mid3+mid4); // equilibrium position is average of neighbors
-                highp float med = pv.b;
-				med *= 1.5;
-                newvel = med*(mid-pos)+vel*vDamping;
-        		newpos = pos+newvel;
+                highp float speedindex = pv.b; // square of refractive index
+				speedindex *= 1.5; // Scale factor to correct unit mismatch, ensuring front-end light speed is accurately 299792458 m/s
+                newderivative = speedindex*(mid-amplitude)+derivative*vDamping;
+        		newamplitude = amplitude+newderivative;
         }
-		// update position and velocity
-        gl_FragColor = vec4(newpos, newvel, pv.b, 1.);
+		// update wave amplitude and derivative
+        gl_FragColor = vec4(newamplitude, newderivative, pv.b, 1.);
 }
 
 </script>
