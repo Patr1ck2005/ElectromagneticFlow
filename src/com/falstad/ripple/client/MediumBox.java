@@ -31,7 +31,10 @@ public class MediumBox extends RectDragObject {
 	MediumBox(StringTokenizer st) {
 		super(st);
 		speedIndex = new Double(st.nextToken()).doubleValue();
-		dampingIndex = new Double(st.nextToken()).doubleValue();
+		if (st.hasMoreTokens()) {
+			dampingIndex = new Double(st.nextToken()).doubleValue();
+		}
+		else dampingIndex = 1.; //to consist with old String token which has no dampingIndex information
 	}
 	
 	MediumBox(int x, int y, int x2, int y2) {
