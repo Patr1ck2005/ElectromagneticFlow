@@ -44,7 +44,8 @@ public class MediumBox extends RectDragObject {
 		RippleSim.drawMedium(topLeft.x, topLeft.y, topRight.x, topRight.y, 
 				bottomLeft.x, bottomLeft.y,
 				bottomRight.x, bottomRight.y,
-				speedIndex, speedIndex);
+				speedIndex, speedIndex,
+				.99, .99);
 	}
 	
 	// let people poke inside

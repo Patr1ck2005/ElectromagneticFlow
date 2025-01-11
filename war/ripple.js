@@ -114,7 +114,7 @@ var transform = [1, 0, 0, 1, 0, 0];
     var pMatrix = mat4.create();
     var matrix3d = mat4.create();
     var zoom3d = 1;
-    
+
     function mvPushMatrix() {
         var copy = mat4.create();
         mat4.set(mvMatrix, copy);
@@ -163,7 +163,7 @@ var transform = [1, 0, 0, 1, 0, 0];
 
     	//gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, rttFramebuffer.width, rttFramebuffer.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
     	gl.HALF_FLOAT_OES = 0x8D61;
-    	
+
     	if (fbType == 0) {
     		// this works on android
     		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, rttFramebuffer.width, rttFramebuffer.height, 0, gl.RGBA, gl.FLOAT, null);
@@ -211,7 +211,7 @@ var transform = [1, 0, 0, 1, 0, 0];
     var simVertexTextureCoordBuffer;
     var simVertexBuffer;
     var simVertexDampingBuffer;
-    
+
     var simPosition = [];
     var simTextureCoord = [];
     var simDamping = [];
@@ -274,11 +274,11 @@ var transform = [1, 0, 0, 1, 0, 0];
     	}
     	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texture3D), gl.STATIC_DRAW);
     	screen3DTextureBuffer.numItems = texture3D.length / 2;
-    	
+
     	simPosition = [];
     	simDamping = [];
     	simTextureCoord = [];
-    	
+
     	// visible area
     	setPosRect(windowOffsetX, windowOffsetY, gridSizeX-windowOffsetX, gridSizeY-windowOffsetY);
 
@@ -368,7 +368,7 @@ var transform = [1, 0, 0, 1, 0, 0];
         gl.enableVertexAttribArray(prog.dampingAttribute);
         gl.enableVertexAttribArray(prog.vertexPositionAttribute);
         gl.enableVertexAttribArray(prog.textureCoordAttribute);
-        
+
         gl.bindBuffer(gl.ARRAY_BUFFER, simVertexDampingBuffer);
         gl.vertexAttribPointer(prog.dampingAttribute, simVertexDampingBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -415,7 +415,7 @@ var transform = [1, 0, 0, 1, 0, 0];
 
         gl.enableVertexAttribArray(prog.vertexPositionAttribute);
         gl.enableVertexAttribArray(prog.textureCoordAttribute);
-        
+
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, renderTexture2.texture);
         gl.uniform1i(prog.samplerUniform, 0);
@@ -462,7 +462,7 @@ var transform = [1, 0, 0, 1, 0, 0];
         }
         if (sim.drawingSelection < 0)
         	gl.vertexAttrib4f(shaderProgramDraw.colorAttribute, 1, 1.0, 1.0, 1.0);
-        else 
+        else
         	gl.vertexAttrib4f(shaderProgramDraw.colorAttribute, sim.drawingSelection,
         			sim.drawingSelection, 0, 1.0);
 
@@ -617,13 +617,13 @@ var transform = [1, 0, 0, 1, 0, 0];
     		gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
     		gl.viewport(0, 0, rttFramebuffer.width, rttFramebuffer.height);
             gl.useProgram(shaderProgramDraw);
-            
+
             // blue channel used for walls and media
-    		gl.colorMask(false, false, true, false);
+    		gl.colorMask(false, false, true, true);
     		gl.vertexAttrib4f(shaderProgramDraw.colorAttribute, 0.0, 0.0, v, 1.0);
     	}
     }
-    
+
     // gl.lineWidth does not work on Chrome, so we need this workaround to draw lines as
     // triangle strips instead
     function thickLinePoints(arr, thick) {
@@ -638,13 +638,13 @@ var transform = [1, 0, 0, 1, 0, 0];
     			var mult = thick/dl;
     			ax =  mult*dy;
     			ay = -mult*dx;
-    		}	
+    		}
     		result.push(arr[i]+ax, arr[i+1]+ay, arr[i]-ax, arr[i+1]-ay);
     	}
     	result.push(arr[i]+ax, arr[i+1]+ay, arr[i]-ax, arr[i+1]-ay);
     	return result;
     }
-    
+
     function drawWall(x, y, x2, y2, v) {
     	setupForDrawing(v);
         gl.bindBuffer(gl.ARRAY_BUFFER, sourceBuffer);
@@ -740,7 +740,7 @@ var transform = [1, 0, 0, 1, 0, 0];
         gl.vertexAttribPointer(shaderProgramDraw.vertexPositionAttribute, sourceBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
         gl.enableVertexAttribArray(shaderProgramDraw.vertexPositionAttribute);
-        
+
         loadMatrix(pMatrix);
         setMatrixUniforms(shaderProgramDraw);
         gl.drawArrays(gl.TRIANGLE_FAN, 0, coords.length/2);
@@ -749,7 +749,7 @@ var transform = [1, 0, 0, 1, 0, 0];
 		gl.colorMask(true, true, true, true);
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
-    
+
     function drawSolidEllipse(cx, cy, xr, yr, med) {
     	setupForDrawing(med);
         gl.bindBuffer(gl.ARRAY_BUFFER, sourceBuffer);
@@ -775,16 +775,22 @@ var transform = [1, 0, 0, 1, 0, 0];
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
-    function drawMedium(x, y, x2, y2, x3, y3, x4, y4, m1, m2) {
+    function drawMedium(x, y, x2, y2, x3, y3, x4, y4, m1, m2, k1, k2) {
 		var rttFramebuffer = renderTexture1.framebuffer;
 		gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
 		gl.viewport(0, 0, rttFramebuffer.width, rttFramebuffer.height);
-		gl.colorMask(false, false, true, false);
+		gl.colorMask(false, false, true, true);
 //		gl.clear(gl.COLOR_BUFFER_BIT);
         gl.useProgram(shaderProgramDraw);
 
         var medCoords = [x, y, x2, y2, x3, y3, x4, y4];
-        var colors = [ 0,0,m1,1, 0,0,m1,1, 0,0,m2,1, 0,0,m2,1 ];
+        // 将波速系数存储在蓝色通道，衰减系数存储在透明度通道
+        var colors = [
+            0.0, 0.0, m1, k1, // 顶点1: R=0, G=0, B=m1, A=k1
+            0.0, 0.0, m1, k1, // 顶点2: R=0, G=0, B=m1, A=k1
+            0.0, 0.0, m2, k2, // 顶点3: R=0, G=0, B=m2, A=k2
+            0.0, 0.0, m2, k2  // 顶点4: R=0, G=0, B=m2, A=k2
+        ];
         gl.bindBuffer(gl.ARRAY_BUFFER, sourceBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(medCoords), gl.STATIC_DRAW);
         gl.vertexAttribPointer(shaderProgramDraw.vertexPositionAttribute, sourceBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -792,7 +798,7 @@ var transform = [1, 0, 0, 1, 0, 0];
         gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
         gl.vertexAttribPointer(shaderProgramDraw.colorAttribute, colorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        
+
         loadMatrix(pMatrix);
         setMatrixUniforms(shaderProgramDraw);
         gl.enableVertexAttribArray(shaderProgramDraw.vertexPositionAttribute);
@@ -847,12 +853,12 @@ var transform = [1, 0, 0, 1, 0, 0];
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
-    
+
     function drawTriangle(x, y, x2, y2, x3, y3, m) {
 		var rttFramebuffer = renderTexture1.framebuffer;
 		gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
 		gl.viewport(0, 0, rttFramebuffer.width, rttFramebuffer.height);
-		gl.colorMask(false, false, true, false);
+		gl.colorMask(false, false, true, true);
 //		gl.clear(gl.COLOR_BUFFER_BIT);
 
         gl.useProgram(shaderProgramDraw);
@@ -1027,7 +1033,7 @@ var transform = [1, 0, 0, 1, 0, 0];
     	sim.drawLens = function (x, y, w, h, m) { drawLens(x, y, w, h, m); }
     	sim.drawEllipse = function (x, y, x2, y2, m) { drawEllipse(x, y, x2, y2); }
     	sim.drawSolidEllipse = function (x, y, x2, y2, m) { drawSolidEllipse(x, y, x2, y2, m); }
-    	sim.drawMedium = function (x, y, x2, y2, x3, y3, x4, y4, m, m2) { drawMedium(x, y, x2, y2, x3, y3, x4, y4, m, m2); }
+    	sim.drawMedium = function (x, y, x2, y2, x3, y3, x4, y4, m, m2, k1, k2) { drawMedium(x, y, x2, y2, x3, y3, x4, y4, m, m2, k1, k2); }
     	sim.drawTriangle = function (x, y, x2, y2, x3, y3, m) { drawTriangle(x, y, x2, y2, x3, y3, m); }
     	sim.drawModes = function (x, y, x2, y2, a, b, c, d) { drawModes(x, y, x2, y2, a, b, c, d); }
     	sim.setTransform = function (a, b, c, d, e, f) {
@@ -1039,7 +1045,7 @@ var transform = [1, 0, 0, 1, 0, 0];
     		var rttFramebuffer = renderTexture1.framebuffer;
     		gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
     		gl.viewport(0, 0, rttFramebuffer.width, rttFramebuffer.height);
-    		gl.colorMask(true, true, false, false);	
+    		gl.colorMask(true, true, false, false);
         	gl.clearColor(0.0, 0.0, 1.0, 1.0);
     		gl.clear(gl.COLOR_BUFFER_BIT);
     		gl.colorMask(true, true, true, true);
@@ -1049,7 +1055,7 @@ var transform = [1, 0, 0, 1, 0, 0];
     		var rttFramebuffer = renderTexture1.framebuffer;
     		gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
     		gl.viewport(0, 0, rttFramebuffer.width, rttFramebuffer.height);
-    		gl.colorMask(false, false, true, false);
+    		gl.colorMask(false, false, true, true);
         	gl.clearColor(0.0, 0.0, 1.0, 1.0);
     		gl.clear(gl.COLOR_BUFFER_BIT);
     		gl.colorMask(true, true, true, true);

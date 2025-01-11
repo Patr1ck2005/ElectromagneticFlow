@@ -187,6 +187,7 @@ void main()
 {
         highp float newderivative = 0.;
     	highp float newamplitude = 0.;
+    	highp float dampingindex = 1.;
         highp vec4 pv = texture2D(uSampler, vTextureCoord);
         if (pv.b > 0.0) {
                 highp float amplitude = pv.r;
@@ -198,11 +199,12 @@ void main()
                 highp float mid = .25*(mid1+mid2+mid3+mid4); // equilibrium position is average of neighbors
                 highp float speedindex = pv.b; // square of refractive index
 				speedindex *= 1.5; // Scale factor to correct unit mismatch, ensuring front-end light speed is accurately 299792458 m/s
-                newderivative = speedindex*(mid-amplitude)+derivative*vDamping;
+                dampingindex = pv.a; // 读取透明度通道中的 dampingindex
+                newderivative = speedindex*(mid-amplitude)+derivative*vDamping*dampingindex;
         		newamplitude = amplitude+newderivative;
         }
 		// update wave amplitude and derivative
-        gl_FragColor = vec4(newamplitude, newderivative, pv.b, 1.);
+        gl_FragColor = vec4(newamplitude, newderivative, pv.b, pv.a);
 }
 
 </script>
@@ -225,7 +227,7 @@ void main()
     highp vec4 pv = texture2D(uSampler, vTextureCoord);
     highp float dist = length(vPosition.xy - pokePosition);
     highp float fade = clamp(1.0-dist/0.01, 0.0, 1.0);
-    gl_FragColor = vec4(mix(pv.r, pokeValue, fade), mix(pv.g, 0.0, fade), pv.b, 1.);
+    gl_FragColor = vec4(mix(pv.r, pokeValue, fade), mix(pv.g, 0.0, fade), pv.b, pv.a);
 }
 
 </script>

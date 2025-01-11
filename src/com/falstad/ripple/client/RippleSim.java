@@ -20,16 +20,12 @@
 package com.falstad.ripple.client;
 
 import java.util.Vector;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.gargoylesoftware.htmlunit.javascript.host.Console;
-import com.gargoylesoftware.htmlunit.javascript.host.Navigator;
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.CanvasPixelArray;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.ImageData;
-import com.google.gwt.core.client.Duration;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.CanvasElement;
 import com.google.gwt.dom.client.NativeEvent;
@@ -70,11 +66,9 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbsolutePanel;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.Frame;
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.MenuBar;
@@ -82,7 +76,6 @@ import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class RippleSim implements MouseDownHandler, MouseMoveHandler,
@@ -397,8 +390,8 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
 		this.drawSolidEllipse(x1, y1, rx, ry, med);
 	}-*/;
 
-	static native void drawMedium(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, double med, double med2) /*-{
-		this.drawMedium(x1, y1, x2, y2, x3, y3, x4, y4, med, med2);
+	static native void drawMedium(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, double med, double med2, double k1, double k2) /*-{
+		this.drawMedium(x1, y1, x2, y2, x3, y3, x4, y4, med, med2, k1, k2);
 	}-*/;
 	
 	static native void drawModes(int x1, int y1, int x2, int y2, double a, double b, double c, double d) /*-{
@@ -759,7 +752,7 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
     	mainMenuBar.addItem(getClassCheckItem("Add Medium", "MediumBox"));
     	mainMenuBar.addItem(getClassCheckItem("Add PhotonicCrystal", "PhotonicCrystal"));
     	mainMenuBar.addItem(getClassCheckItem("Add PhotonicCrystalEllipse", "PhotonicCrystalEllipse"));
-    	mainMenuBar.addItem(getClassCheckItem("Add TemporalCrystal", "TemporalCrystalMediumBox"));
+    	mainMenuBar.addItem(getClassCheckItem("Add TimeCrystal", "TimeCrystalMediumBox"));
     	mainMenuBar.addItem(getClassCheckItem("Add Mode Box", "ModeBox"));
     	mainMenuBar.addItem(getClassCheckItem("Add Gradient", "GradientBox"));
     	mainMenuBar.addItem(getClassCheckItem("Add Ellipse", "Ellipse"));
@@ -845,8 +838,8 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
 			newObject = new PhotonicCrystal();
 		if (item.equals("PhotonicCrystalEllipse"))
 			newObject = new PhotonicCrystalEllipse();
-		if (item.equals("TemporalCrystalMediumBox"))
-			newObject = new TemporalCrystalMediumBox();
+		if (item.equals("TimeCrystalMediumBox"))
+			newObject = new TimeCrystalMediumBox();
     	if (item == "GradientBox")
     		newObject = new GradientBox();
     	if (item == "Cavity")
@@ -915,7 +908,7 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
     	if (tint == 'm') return new MediumBox(st);
     	if (tint == 'C') return new PhotonicCrystal(st);
     	if (tint == 100) return new PhotonicCrystalEllipse(st);
-		if (tint == 'T') return new TemporalCrystalMediumBox(st); // 添加这一行
+		if (tint == 'T') return new TimeCrystalMediumBox(st);
     	if (tint == 'E') return new MediumEllipse(st);
     	if (tint == 'M') return new ModeBox(st);
     	if (tint == 'd') return new MovingSource(st);

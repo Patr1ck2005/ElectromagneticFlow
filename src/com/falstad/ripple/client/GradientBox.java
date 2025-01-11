@@ -37,7 +37,8 @@ public class GradientBox extends RectDragObject {
 		RippleSim.drawMedium(topLeft.x, topLeft.y, topRight.x, topRight.y, 
 				bottomLeft.x, bottomLeft.y,
 				bottomRight.x, bottomRight.y,
-				speedIndex, speedIndex2);
+				speedIndex, speedIndex2,
+				1, 1);
 	}
 	
     public EditInfo getEditInfo(int n) {

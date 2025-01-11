@@ -73,7 +73,8 @@ public class PhotonicCrystal extends MediumBox {
                         cellTopRightX, cellTopRightY,
                         cellBottomLeftX, cellBottomLeftY,
                         cellBottomRightX, cellBottomRightY,
-                        currentSpeedIndex, currentSpeedIndex
+                        currentSpeedIndex, currentSpeedIndex,
+                        1, 1
                 );
             }
         }

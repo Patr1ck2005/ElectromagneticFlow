@@ -43,7 +43,8 @@ public class PhotonicCrystalEllipse extends PhotonicCrystal {
                 bottomLeft.y,
                 bottomRight.x,
                 bottomRight.y,
-                speedIndex, speedIndex
+                speedIndex, speedIndex,
+                1, 1
         );
 
         // 计算每个孔洞的间距

@@ -1,12 +1,13 @@
 package com.falstad.ripple.client;
 
 
-public class TemporalCrystalMediumBox extends MediumBox {
+public class TimeCrystalMediumBox extends MediumBox {
     // 新增的字段
-    private double amplitude;     // 折射率变化的振幅
-    private double frequency;     // 变化的频率（模拟频率）
-    private double phaseShift;    // 当前相位偏移
-    private double freqTimeZero;  // 频率时间零点
+//    private double dynamicSpeedIndex;   // 实时的动态折射率
+    private double amplitude;           // 折射率变化的振幅
+    private double frequency;           // 变化的频率（模拟频率）
+    private double phaseShift;          // 当前相位偏移
+    private double freqTimeZero;        // 频率时间零点
 
     EditInfo frequencyEditInfo, wavelengthEditInfo;
 
@@ -14,7 +15,7 @@ public class TemporalCrystalMediumBox extends MediumBox {
     static final double freqScale = 92.0 / 3.0 * 0.5; // 约为15.333
 
     // 默认构造函数
-    TemporalCrystalMediumBox() {
+    TimeCrystalMediumBox() {
         super();
         this.amplitude = 0.1;
         this.frequency = 0.5; // 与 Source 类默认频率一致
@@ -23,7 +24,7 @@ public class TemporalCrystalMediumBox extends MediumBox {
     }
 
     // 通过 StringTokenizer 解析构造函数
-    TemporalCrystalMediumBox(StringTokenizer st) {
+    TimeCrystalMediumBox(StringTokenizer st) {
         super(st);
         this.amplitude = Double.parseDouble(st.nextToken());
         this.frequency = Double.parseDouble(st.nextToken());
@@ -32,7 +33,7 @@ public class TemporalCrystalMediumBox extends MediumBox {
     }
 
     // 通过坐标创建对象的构造函数
-    TemporalCrystalMediumBox(int x, int y, int x2, int y2) {
+    TimeCrystalMediumBox(int x, int y, int x2, int y2) {
         super(x, y, x2, y2);
         this.amplitude = 0.1;
         this.frequency = 0.5; // 与 Source 类默认频率一致
@@ -52,7 +53,7 @@ public class TemporalCrystalMediumBox extends MediumBox {
         RippleSim.drawMedium(
                 topLeft.x, topLeft.y, topRight.x, topRight.y,
                 bottomLeft.x, bottomLeft.y, bottomRight.x, bottomRight.y,
-                dynamicSpeedIndex, dynamicSpeedIndex
+                dynamicSpeedIndex, dynamicSpeedIndex, 1, 1
         );
     }
 
