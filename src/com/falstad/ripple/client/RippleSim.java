@@ -395,7 +395,7 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
 	}-*/;
 
 	static native void drawPML(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, double med, double k_min, double f, int n) /*-{
-		this.drawMedium(x1, y1, x2, y2, x3, y3, x4, y4, med, 1., 1., k_min);
+		this.drawPML(x1, y1, x2, y2, x3, y3, x4, y4, med, k_min, f, n);
 	}-*/;
 	
 	static native void drawModes(int x1, int y1, int x2, int y2, double a, double b, double c, double d) /*-{

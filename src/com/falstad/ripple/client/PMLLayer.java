@@ -5,7 +5,12 @@ public class PMLLayer extends MediumBox {
     int order;
 
 
-    PMLLayer() {}
+    PMLLayer() {
+        speedIndex = 1.;
+        dampingIndex = 0.9;
+        frequency = 1.;
+        order = 1;
+    }
     PMLLayer(StringTokenizer st) { super(st); }
 
     void prepare() {
