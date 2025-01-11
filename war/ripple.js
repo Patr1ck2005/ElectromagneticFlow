@@ -537,9 +537,13 @@ var transform = [1, 0, 0, 1, 0, 0];
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(srcCoords), gl.STATIC_DRAW);
         gl.vertexAttribPointer(shaderProgramDrawLine.vertexPositionAttribute, sourceBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-        var colors = [ f,0,1, 0, f,0,1,0 ];
+        var colors = [
+            f,0,1,0,
+            f,0,1,0];
         if (gauss)
-        	colors = [ f,0,1,-3, f,0,1,3 ];
+        	colors = [
+                f,0,1,-3,
+                f,0,1,3];
         gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
         gl.vertexAttribPointer(shaderProgramDrawLine.colorAttribute, colorBuffer.itemSize, gl.FLOAT, false, 0, 0);
