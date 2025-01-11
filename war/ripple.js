@@ -811,6 +811,101 @@ var transform = [1, 0, 0, 1, 0, 0];
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
+    function drawPML(x1, y1, x2, y2, x3, y3, x4, y4, m, k_max, f, n) {
+        // 计算角频率
+        var omega = 2 * Math.PI * f;
+
+        // 计算 PML 区域宽度（假设 PML 从主域边界逐渐扩展）
+        // 你可以根据具体需求调整 PML 的宽度计算方式
+        var d_PML = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1));
+
+        // 计算阻尼系数的分布
+        // 这里假设 PML 区域内阻尼系数从0到k_max按照距离边界的幂次分布增加
+        // 对于四个顶点，计算每个顶点的阻尼系数
+        // 通常，PML 是边界的一部分，所以可以根据具体位置计算每个方向的阻尼
+        // 为简化，这里假设 PML 区域在 x 和 y 方向上对称分布
+
+        // 计算每个方向的阻尼系数
+        // 这里假设 PML 的边界在 x 和 y 方向上分别从0到d_PML
+        // 你需要根据具体的 PML 位置调整这些计算
+
+        // 示例：计算 PML 在 x 方向上的阻尼系数
+        // 假设 x1, y1 是 PML 的左下角，x2, y2 是右下角，x3, y3 是右上角，x4, y4 是左上角
+
+        // 计算中心点
+        var centerX = (x1 + x2 + x3 + x4) / 4;
+        var centerY = (y1 + y2 + y3 + y4) / 4;
+
+        // 计算每个顶点到中心点的距离，用于阻尼系数分布
+        var distances = [
+            Math.sqrt(Math.pow(x1 - centerX, 2) + Math.pow(y1 - centerY, 2)),
+            Math.sqrt(Math.pow(x2 - centerX, 2) + Math.pow(y2 - centerY, 2)),
+            Math.sqrt(Math.pow(x3 - centerX, 2) + Math.pow(y3 - centerY, 2)),
+            Math.sqrt(Math.pow(x4 - centerX, 2) + Math.pow(y4 - centerY, 2))
+        ];
+
+        // 归一化距离并计算阻尼系数
+        var k_values = distances.map(function(d) {
+            // 归一化距离到 [0, 1]
+            var normalized = d / d_PML;
+            if (normalized > 1) normalized = 1; // 限制最大值为1
+            // 计算阻尼系数，使用幂次分布
+            return k_max * Math.pow(normalized, n);
+        });
+
+        // 为每个顶点定义波速和阻尼系数
+        // 假设主计算域的波速为 m = 1（你可以根据需要调整）
+        var m1 = 1.0;
+        var m2 = 1.0;
+        var k1 = k_values[0]; // 顶点1的阻尼系数
+        var k2 = k_values[1]; // 顶点2的阻尼系数
+        var k3 = k_values[2]; // 顶点3的阻尼系数
+        var k4 = k_values[3]; // 顶点4的阻尼系数
+
+        // 定义顶点坐标
+        var medCoords = [x1, y1, x2, y2, x3, y3, x4, y4];
+
+        // 定义颜色数组
+        // 波速存储在蓝色通道，阻尼系数存储在透明度通道
+        var colors = [
+            0.0, 0.0, m1, k1, // 顶点1: R=0, G=0, B=m1, A=k1
+            0.0, 0.0, m1, k2, // 顶点2: R=0, G=0, B=m1, A=k2
+            0.0, 0.0, m2, k3, // 顶点3: R=0, G=0, B=m2, A=k3
+            0.0, 0.0, m2, k4  // 顶点4: R=0, G=0, B=m2, A=k4
+        ];
+
+        // 绑定并传递顶点坐标数据
+        gl.bindBuffer(gl.ARRAY_BUFFER, sourceBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(medCoords), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(shaderProgramDraw.vertexPositionAttribute, sourceBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        // 绑定并传递颜色数据
+        gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(shaderProgramDraw.colorAttribute, colorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        // 设置矩阵
+        loadMatrix(pMatrix);
+        setMatrixUniforms(shaderProgramDraw);
+
+        // 启用顶点属性
+        gl.enableVertexAttribArray(shaderProgramDraw.vertexPositionAttribute);
+        gl.enableVertexAttribArray(shaderProgramDraw.colorAttribute);
+
+        // 绘制 PML 区域
+        gl.useProgram(shaderProgramDraw);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        // 禁用顶点属性
+        gl.disableVertexAttribArray(shaderProgramDraw.vertexPositionAttribute);
+        gl.disableVertexAttribArray(shaderProgramDraw.colorAttribute);
+
+        // 恢复颜色掩码和绑定帧缓冲
+        gl.colorMask(true, true, true, true);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    }
+
+
     function drawModes(x, y, x2, y2, a, b, c, d) {
 		var rttFramebuffer = renderTexture1.framebuffer;
 		gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
