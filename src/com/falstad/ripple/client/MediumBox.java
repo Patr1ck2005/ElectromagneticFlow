@@ -21,18 +21,22 @@ package com.falstad.ripple.client;
 
 public class MediumBox extends RectDragObject {
 	double speedIndex;
+	double dampingIndex;
 	
 	MediumBox() {
 		speedIndex = .25;
+		dampingIndex = 1.;
 	}
 	
 	MediumBox(StringTokenizer st) {
 		super(st);
 		speedIndex = new Double(st.nextToken()).doubleValue();
+		dampingIndex = new Double(st.nextToken()).doubleValue();
 	}
 	
 	MediumBox(int x, int y, int x2, int y2) {
 		speedIndex = .25;
+		dampingIndex = 1.;
 		topLeft.x = bottomLeft.x = x;
 		topLeft.y = topRight.y = y;
 		topRight.x = bottomRight.x = x2;
@@ -45,7 +49,7 @@ public class MediumBox extends RectDragObject {
 				bottomLeft.x, bottomLeft.y,
 				bottomRight.x, bottomRight.y,
 				speedIndex, speedIndex,
-				.99, .99);
+				dampingIndex, dampingIndex);
 	}
 	
 	// let people poke inside
@@ -55,6 +59,9 @@ public class MediumBox extends RectDragObject {
         if (n == 0)
             return new EditInfo("Refractive Index (1-2)", Math.sqrt(1/speedIndex), 0, 1).
                 setDimensionless();
+		if (n == 1)
+			return new EditInfo("Damping Index (0.9-1.1)", dampingIndex, 0, 1).
+					setDimensionless();
         return null;
     }
     public void setEditValue(int n, EditInfo ei) {
@@ -63,6 +70,10 @@ public class MediumBox extends RectDragObject {
         	ei.value = Math.sqrt(1/speedIndex);
         	EditDialog.theEditDialog.updateValue(ei);
         }
+		if (n == 1) {
+			dampingIndex = ei.value;
+			EditDialog.theEditDialog.updateValue(ei);
+		}
     }
 
     static double getSpeedIndex(double v) {
@@ -74,5 +85,5 @@ public class MediumBox extends RectDragObject {
     }
     
 	int getDumpType() { return 'm'; }
-	String dump() { return super.dump() + " " + speedIndex; }
+	String dump() { return super.dump() + " " + speedIndex + " " + dampingIndex; }
 }

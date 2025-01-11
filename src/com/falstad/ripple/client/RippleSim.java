@@ -393,6 +393,10 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
 	static native void drawMedium(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, double med, double med2, double k1, double k2) /*-{
 		this.drawMedium(x1, y1, x2, y2, x3, y3, x4, y4, med, med2, k1, k2);
 	}-*/;
+
+	static native void drawPML(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, double med, double k_min, double f, int n) /*-{
+		this.drawMedium(x1, y1, x2, y2, x3, y3, x4, y4, med, 1., 1., k_min);
+	}-*/;
 	
 	static native void drawModes(int x1, int y1, int x2, int y2, double a, double b, double c, double d) /*-{
 		this.drawModes(x1, y1, x2, y2, a, b, c, d);
@@ -750,6 +754,7 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
     	mainMenuBar.addItem(getClassCheckItem("Add Moving Source", "MovingSource"));
     	mainMenuBar.addItem(getClassCheckItem("Add Cavity", "Cavity"));
     	mainMenuBar.addItem(getClassCheckItem("Add Medium", "MediumBox"));
+    	mainMenuBar.addItem(getClassCheckItem("Add PMLLayer", "PMLLayer"));
     	mainMenuBar.addItem(getClassCheckItem("Add PhotonicCrystal", "PhotonicCrystal"));
     	mainMenuBar.addItem(getClassCheckItem("Add PhotonicCrystalEllipse", "PhotonicCrystalEllipse"));
     	mainMenuBar.addItem(getClassCheckItem("Add TimeCrystal", "TimeCrystalMediumBox"));
@@ -834,6 +839,8 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
     		newObject = new Box();
     	if (item == "MediumBox")
     		newObject = new MediumBox();
+		if (item == "PMLLayer")
+			newObject = new PMLLayer();
 		if (item.equals("PhotonicCrystal"))
 			newObject = new PhotonicCrystal();
 		if (item.equals("PhotonicCrystalEllipse"))
@@ -906,6 +913,7 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
     	if (tint == 'l') return new Lens(st);
     	if (tint == 'S') return new LineSource(st);
     	if (tint == 'm') return new MediumBox(st);
+    	if (tint == 999) return new PMLLayer(st);
     	if (tint == 'C') return new PhotonicCrystal(st);
     	if (tint == 100) return new PhotonicCrystalEllipse(st);
 		if (tint == 'T') return new TimeCrystalMediumBox(st);
