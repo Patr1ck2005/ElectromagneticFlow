@@ -6,7 +6,6 @@ public class TimeCrystalMediumBox extends MediumBox {
 //    private double dynamicSpeedIndex;   // 实时的动态折射率
     private double amplitude;           // 折射率变化的振幅
     private double frequency;           // 变化的频率（模拟频率）
-    private double phaseShift;          // 当前相位偏移
     private double freqTimeZero;        // 频率时间零点
 
     EditInfo frequencyEditInfo, wavelengthEditInfo;
@@ -19,7 +18,6 @@ public class TimeCrystalMediumBox extends MediumBox {
         super();
         this.amplitude = 0.1;
         this.frequency = 0.5; // 与 Source 类默认频率一致
-        this.phaseShift = 0.0;
         this.freqTimeZero = 0.0;
     }
 
@@ -28,7 +26,6 @@ public class TimeCrystalMediumBox extends MediumBox {
         super(st);
         this.amplitude = Double.parseDouble(st.nextToken());
         this.frequency = Double.parseDouble(st.nextToken());
-        this.phaseShift = Double.parseDouble(st.nextToken());
         this.freqTimeZero = 0.0;
     }
 
@@ -37,7 +34,6 @@ public class TimeCrystalMediumBox extends MediumBox {
         super(x, y, x2, y2);
         this.amplitude = 0.1;
         this.frequency = 0.5; // 与 Source 类默认频率一致
-        this.phaseShift = 0.0;
         this.freqTimeZero = 0.0;
     }
 
@@ -53,7 +49,7 @@ public class TimeCrystalMediumBox extends MediumBox {
         RippleSim.drawMedium(
                 topLeft.x, topLeft.y, topRight.x, topRight.y,
                 bottomLeft.x, bottomLeft.y, bottomRight.x, bottomRight.y,
-                dynamicSpeedIndex, dynamicSpeedIndex, 1, 1
+                dynamicSpeedIndex, dynamicSpeedIndex, dampingIndex, dampingIndex
         );
     }
 
@@ -65,12 +61,15 @@ public class TimeCrystalMediumBox extends MediumBox {
     @Override
     public EditInfo getEditInfo(int n) {
         if (n == 0) {
-            return new EditInfo("Refractive Epsilon (1-2)", Math.pow(1/speedIndex, 0.25), 0, 1)
+            return new EditInfo("Dielectric Epsilon (1-2)", Math.pow(1/speedIndex, 0.25), 0, 1)
                     .setDimensionless();
         } else if (n == 1) {
             return new EditInfo("Amplitude", amplitude, 0, 1)
                     .setDimensionless();
         } else if (n == 2) {
+            return new EditInfo("DampingIndex", dampingIndex, 0, 1)
+                    .setDimensionless();
+        } else if (n == 3) {
             return new EditInfo("Frequency (Hz)", getRealFrequency(), 4, 500) // 与 Source 类频率范围一致
                     .setDimensionless();
         }
@@ -86,6 +85,9 @@ public class TimeCrystalMediumBox extends MediumBox {
             amplitude = ei.value;
             EditDialog.theEditDialog.updateValue(ei);
         } else if (n == 2) {
+            dampingIndex = ei.value;
+            EditDialog.theEditDialog.updateValue(ei);
+        } else if (n == 3) {
             setFrequency(ei.value); // 使用 setFrequency 方法
             enforceMaxFrequency();
             EditDialog.theEditDialog.updateValue(ei);
@@ -99,7 +101,7 @@ public class TimeCrystalMediumBox extends MediumBox {
 
     @Override
     String dump() {
-        return "T " + super.dump() + " " + amplitude + " " + frequency + " " + phaseShift + " " + freqTimeZero;
+        return "T " + super.dump() + " " + amplitude + " " + frequency + " " + freqTimeZero;
     }
 
     // 设置频率，保持与 Source 类一致

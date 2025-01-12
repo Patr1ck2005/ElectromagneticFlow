@@ -60,7 +60,7 @@ public class MediumBox extends RectDragObject {
 
     public EditInfo getEditInfo(int n) {
         if (n == 0)
-            return new EditInfo("Refractive Index (1-2)", Math.sqrt(1/speedIndex), 0, 1).
+            return new EditInfo("Refractive Index (0.85-4)", Math.sqrt(1/speedIndex), 0, 1).
                 setDimensionless();
 		if (n == 1)
 			return new EditInfo("Damping Index (0.9-1.1)", dampingIndex, 0, 1).

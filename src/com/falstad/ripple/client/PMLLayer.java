@@ -9,7 +9,7 @@ public class PMLLayer extends MediumBox {
         speedIndex = 1.;
         dampingIndex = 0.9;
         frequency = 1.;
-        order = 1;
+        order = 2;
     }
     PMLLayer(StringTokenizer st) { super(st); }
 
@@ -27,7 +27,7 @@ public class PMLLayer extends MediumBox {
             return new EditInfo("Refractive Index (1-2)", Math.sqrt(1/speedIndex), 0, 1).
                     setDimensionless();
         } else if (n == 1) {
-            return new EditInfo("Damping Index (0.9-1.1)", dampingIndex, 0, 1).
+            return new EditInfo("Damping Index (0.5-1.0)", dampingIndex, 0, 1).
                     setDimensionless();
         } else if (n == 2) {
             return new EditInfo("frequency", frequency, 1, 100);
