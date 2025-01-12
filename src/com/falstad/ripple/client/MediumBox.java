@@ -37,15 +37,15 @@ public class MediumBox extends RectDragObject {
 		else dampingIndex = 1.; //to consist with old String token which has no dampingIndex information
 	}
 	
-	MediumBox(int x, int y, int x2, int y2) {
-		speedIndex = .25;
-		dampingIndex = 1.;
-		topLeft.x = bottomLeft.x = x;
-		topLeft.y = topRight.y = y;
-		topRight.x = bottomRight.x = x2;
-		bottomLeft.y = bottomRight.y = y2;
-		setTransform();
-	}
+//	MediumBox(int x, int y, int x2, int y2) {
+//		speedIndex = .25;
+//		dampingIndex = 1.;
+//		topLeft.x = bottomLeft.x = x;
+//		topLeft.y = topRight.y = y;
+//		topRight.x = bottomRight.x = x2;
+//		bottomLeft.y = bottomRight.y = y2;
+//		setTransform();
+//	} // no usage
 
 	void prepare() {
 		RippleSim.drawMedium(topLeft.x, topLeft.y, topRight.x, topRight.y, 

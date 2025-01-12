@@ -915,7 +915,7 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
     	if (tint == 'm') return new MediumBox(st);
     	if (tint == 999) return new PMLLayer(st);
     	if (tint == 'C') return new PhotonicCrystal(st);
-    	if (tint == 100) return new PhotonicCrystalEllipse(st);
+    	if (tint == 998) return new PhotonicCrystalEllipse(st);
 		if (tint == 'T') return new TimeCrystalMediumBox(st);
     	if (tint == 'E') return new MediumEllipse(st);
     	if (tint == 'M') return new ModeBox(st);
@@ -1238,10 +1238,10 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
 		colorChooser.add("Color Scheme " + (cn + 1));
 	}
 
-	void addMedium() {
-		MediumBox mb = new MediumBox(-windowOffsetX, windowHeight/2, windowWidth+windowOffsetX-1, windowHeight+windowOffsetY-1);
-		dragObjects.add(mb);
-	}
+//	void addMedium() {
+//		MediumBox mb = new MediumBox(-windowOffsetX, windowHeight/2, windowWidth+windowOffsetX-1, windowHeight+windowOffsetY-1);
+//		dragObjects.add(mb);
+//	} // seemingly no usage
 
 	// set length scale and speed for a particular wave type, which determines what units we report
 	// in coordinates box and editing values.  Also, choice of sound/non-sound affects boundary conditions

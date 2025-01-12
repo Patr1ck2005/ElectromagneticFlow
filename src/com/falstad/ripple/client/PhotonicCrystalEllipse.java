@@ -2,34 +2,24 @@ package com.falstad.ripple.client;
 
 
 public class PhotonicCrystalEllipse extends PhotonicCrystal {
-    // 孔洞的折射率对应的速度因子
-    private double speedIndexHole;
-
     // 椭圆的长轴和短轴长度（以像素为单位）
     private int ellipseMajorAxis, ellipseMinorAxis;
 
     // 默认构造函数
     public PhotonicCrystalEllipse() {
         super();
-        this.speedIndexHole = MediumBox.getSpeedIndex(2.0); // 默认孔洞折射率 v2 = 2.0
-        this.ellipseMajorAxis = 30; // 默认长轴长度10像素
-        this.ellipseMinorAxis = 30;  // 默认短轴长度5像素
+        ellipseMajorAxis = 20; // 默认长轴长度10像素
+        ellipseMinorAxis = 20;  // 默认短轴长度5像素
+        // redefine default periodicity
+        rows = 15;
+        cols = 15;
     }
 
     // 通过 StringTokenizer 解析构造函数
     public PhotonicCrystalEllipse(StringTokenizer st) {
         super(st);
-        this.speedIndexHole = Double.parseDouble(st.nextToken());    // 孔洞折射率
-        this.ellipseMajorAxis = Integer.parseInt(st.nextToken());    // 椭圆长轴
-        this.ellipseMinorAxis = Integer.parseInt(st.nextToken());    // 椭圆短轴
-    }
-
-    // 通过坐标创建对象的构造函数
-    public PhotonicCrystalEllipse(int x, int y, int x2, int y2) {
-        super(x, y, x2, y2);
-        this.speedIndexHole = MediumBox.getSpeedIndex(2.0); // 默认孔洞折射率 v2 = 2.0
-        this.ellipseMajorAxis = 30; // 默认长轴长度10像素
-        this.ellipseMinorAxis = 30;  // 默认短轴长度5像素
+        ellipseMajorAxis = Integer.parseInt(st.nextToken());    // 椭圆长轴
+        ellipseMinorAxis = Integer.parseInt(st.nextToken());    // 椭圆短轴
     }
 
     @Override
@@ -67,7 +57,7 @@ public class PhotonicCrystalEllipse extends PhotonicCrystal {
                         (int) Math.round(centerY),
                         ellipseMajorAxis / 2,
                         ellipseMinorAxis / 2,
-                        speedIndexHole
+                        speedIndex2
                 );
             }
         }
@@ -90,13 +80,9 @@ public class PhotonicCrystalEllipse extends PhotonicCrystal {
             // 编辑列数
             return new EditInfo("Columns", cols, 1, 100);
         } else if (n == 4) {
-            // 编辑孔洞折射率
-            return new EditInfo("Hole Refractive Index", Math.sqrt(1 / speedIndexHole), 1, 2)
-                    .setDimensionless();
-        } else if (n == 5) {
             // 编辑椭圆长轴
             return new EditInfo("Ellipse Major Axis", ellipseMajorAxis, 1, 100);
-        } else if (n == 6) {
+        } else if (n == 5) {
             // 编辑椭圆短轴
             return new EditInfo("Ellipse Minor Axis", ellipseMinorAxis, 1, 100);
         }
@@ -124,15 +110,10 @@ public class PhotonicCrystalEllipse extends PhotonicCrystal {
             cols = Math.max(1, (int) ei.value); // 确保列数至少为1
             EditDialog.theEditDialog.updateValue(ei);
         } else if (n == 4) {
-            // 设置孔洞折射率
-            speedIndexHole = MediumBox.getSpeedIndex(ei.value);
-            ei.value = Math.sqrt(1 / speedIndexHole);
-            EditDialog.theEditDialog.updateValue(ei);
-        } else if (n == 5) {
             // 设置椭圆长轴
             ellipseMajorAxis = Math.max(1, (int) ei.value); // 确保长轴至少为1
             EditDialog.theEditDialog.updateValue(ei);
-        } else if (n == 6) {
+        } else if (n == 5) {
             // 设置椭圆短轴
             ellipseMinorAxis = Math.max(1, (int) ei.value); // 确保短轴至少为1
             EditDialog.theEditDialog.updateValue(ei);
@@ -141,11 +122,11 @@ public class PhotonicCrystalEllipse extends PhotonicCrystal {
 
     @Override
     int getDumpType() {
-        return 100; // 使用 100 作为类型标识符
+        return 998; // 使用 998 作为类型标识符
     }
 
     @Override
     String dump() {
-        return 100 + super.dump() + " " + speedIndexHole + " " + ellipseMajorAxis + " " + ellipseMinorAxis;
+        return super.dump() + " " + ellipseMajorAxis + " " + ellipseMinorAxis;
     }
 }

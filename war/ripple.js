@@ -20,7 +20,7 @@ var transform = [1, 0, 0, 1, 0, 0];
                 str += k.textContent;
             }
             k = k.nextSibling;
-        }
+        } //str contains shader source code
 
         var shader;
         if (shaderScript.type == "x-shader/x-fragment") {

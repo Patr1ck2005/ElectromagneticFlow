@@ -16,25 +16,17 @@ public class TimeCrystalMediumBox extends MediumBox {
     // 默认构造函数
     TimeCrystalMediumBox() {
         super();
-        this.amplitude = 0.1;
-        this.frequency = 0.5; // 与 Source 类默认频率一致
-        this.freqTimeZero = 0.0;
+        amplitude = 0.1;
+        frequency = 0.5; // 与 Source 类默认频率一致
+        freqTimeZero = 0.0;
     }
 
     // 通过 StringTokenizer 解析构造函数
     TimeCrystalMediumBox(StringTokenizer st) {
         super(st);
-        this.amplitude = Double.parseDouble(st.nextToken());
-        this.frequency = Double.parseDouble(st.nextToken());
-        this.freqTimeZero = 0.0;
-    }
-
-    // 通过坐标创建对象的构造函数
-    TimeCrystalMediumBox(int x, int y, int x2, int y2) {
-        super(x, y, x2, y2);
-        this.amplitude = 0.1;
-        this.frequency = 0.5; // 与 Source 类默认频率一致
-        this.freqTimeZero = 0.0;
+        amplitude = Double.parseDouble(st.nextToken());
+        frequency = Double.parseDouble(st.nextToken());
+        freqTimeZero = 0.0;
     }
 
     @Override
@@ -101,7 +93,7 @@ public class TimeCrystalMediumBox extends MediumBox {
 
     @Override
     String dump() {
-        return "T " + super.dump() + " " + amplitude + " " + frequency + " " + freqTimeZero;
+        return super.dump() + " " + amplitude + " " + frequency + " " + freqTimeZero;
     }
 
     // 设置频率，保持与 Source 类一致

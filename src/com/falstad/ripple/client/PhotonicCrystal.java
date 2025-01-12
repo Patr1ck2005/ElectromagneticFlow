@@ -10,28 +10,18 @@ public class PhotonicCrystal extends MediumBox {
     // 默认构造函数
     public PhotonicCrystal() {
         super();
-        this.speedIndex = MediumBox.getSpeedIndex(1.5); // 默认折射率 v1 = 1.5
-        this.speedIndex2 = MediumBox.getSpeedIndex(2.0); // 默认折射率 v2 = 2.0
-        this.rows = 5; // 默认5行
-        this.cols = 5; // 默认5列
+        speedIndex = MediumBox.getSpeedIndex(1.1);
+        speedIndex2 = MediumBox.getSpeedIndex(2.0);
+        rows = 5; // 默认5行
+        cols = 5; // 默认5列
     }
 
     // 通过 StringTokenizer 解析构造函数
     public PhotonicCrystal(StringTokenizer st) {
         super(st);
-        this.speedIndex = Double.parseDouble(st.nextToken()); // speedIndex1
-        this.speedIndex2 = Double.parseDouble(st.nextToken()); // speedIndex2
-        this.rows = Integer.parseInt(st.nextToken()); // 行数
-        this.cols = Integer.parseInt(st.nextToken()); // 列数
-    }
-
-    // 通过坐标创建对象的构造函数
-    public PhotonicCrystal(int x, int y, int x2, int y2) {
-        super(x, y, x2, y2);
-        this.speedIndex = MediumBox.getSpeedIndex(1.5); // 默认折射率 v1 = 1.5
-        this.speedIndex2 = MediumBox.getSpeedIndex(2.0); // 默认折射率 v2 = 2.0
-        this.rows = 5; // 默认5行
-        this.cols = 5; // 默认5列
+        speedIndex2 = Double.parseDouble(st.nextToken()); // speedIndex2
+        rows = Integer.parseInt(st.nextToken()); // 行数
+        cols = Integer.parseInt(st.nextToken()); // 列数
     }
 
     @Override
@@ -130,6 +120,6 @@ public class PhotonicCrystal extends MediumBox {
 
     @Override
     String dump() {
-        return 'C' + super.dump() + " " + speedIndex + " " + speedIndex2 + " " + rows + " " + cols;
+        return super.dump() + " " + speedIndex2 + " " + rows + " " + cols;
     }
 }
