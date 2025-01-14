@@ -75,3 +75,5 @@ rotating.txt Rotating Source
 pyramid.txt Step Pyramid Reflections
 interferenceLine.txt Line Source Interference
 bessel_beam.txt Bessel Beam
+diffraction_grating.txt Grating
+spatial_temporal_vortex.txt Spatial Temporal Vortex

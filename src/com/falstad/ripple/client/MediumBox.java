@@ -70,7 +70,7 @@ public class MediumBox extends RectDragObject {
     public void setEditValue(int n, EditInfo ei) {
         if (n == 0) {
         	speedIndex = getSpeedIndex(ei.value);
-        	ei.value = Math.sqrt(1/speedIndex);
+			ei.value = (speedIndex == 0) ? 0 : Math.sqrt(1.0 / speedIndex);
         	EditDialog.theEditDialog.updateValue(ei);
         }
 		if (n == 1) {
@@ -80,6 +80,8 @@ public class MediumBox extends RectDragObject {
     }
 
     static double getSpeedIndex(double v) {
+		if (v <= 0.)
+			return 0.;
     	if (v < .85)
     		v = .85;
     	if (v > 4)

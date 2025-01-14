@@ -11,7 +11,12 @@ public class PMLLayer extends MediumBox {
         frequency = 1.;
         order = 2;
     }
-    PMLLayer(StringTokenizer st) { super(st); }
+
+    PMLLayer(StringTokenizer st) {
+        super(st);
+        frequency = Double.parseDouble(st.nextToken());
+        order = Integer.parseInt(st.nextToken());;
+    }
 
     void prepare() {
         RippleSim.drawPML(topLeft.x, topLeft.y, topRight.x, topRight.y,
@@ -64,7 +69,7 @@ public class PMLLayer extends MediumBox {
 
     @Override
     String dump() {
-        return 999 + super.dump() + " " + speedIndex + " " + dampingIndex + " " + frequency + " " + order;
+        return super.dump() + " " + frequency + " " + order;
     }
 
 }

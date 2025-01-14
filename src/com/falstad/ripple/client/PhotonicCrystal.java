@@ -95,12 +95,12 @@ public class PhotonicCrystal extends MediumBox {
         if (n == 0) {
             // 设置第一种折射率
             speedIndex = MediumBox.getSpeedIndex(ei.value);
-            ei.value = Math.sqrt(1 / speedIndex);
+            ei.value = (speedIndex == 0) ? 0 : Math.sqrt(1.0 / speedIndex);
             EditDialog.theEditDialog.updateValue(ei);
         } else if (n == 1) {
             // 设置第二种折射率
             speedIndex2 = MediumBox.getSpeedIndex(ei.value);
-            ei.value = Math.sqrt(1 / speedIndex2);
+            ei.value = (speedIndex2 == 0) ? 0 : Math.sqrt(1.0 / speedIndex2);
             EditDialog.theEditDialog.updateValue(ei);
         } else if (n == 2) {
             // 设置行数
