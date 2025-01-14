@@ -270,7 +270,7 @@
             vPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
             gl_Position = uPMatrix * vPosition;
             vTextureCoord = aTextureCoord;
-        vDamping = sqrt(aDamping);
+        vDamping = sqrt(aDamping); // smoother the PML boundary condition
         }
     </script>
 

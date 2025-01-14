@@ -329,7 +329,7 @@ var transform = [1, 0, 0, 1, 0, 0];
     		simTextureCoord.push(xi/gridSizeX, yi/gridSizeY);
     		var damp = damping;
     		if (xi == 1 || yi == 1 || xi == gridSizeX-2 || yi == gridSizeY-2)
-    			damp *= .88; // was 20
+    			damp *= .88; // a trade off between first reflection and second reflection
     		simDamping.push(damp);
     	}
     }
@@ -530,12 +530,10 @@ var transform = [1, 0, 0, 1, 0, 0];
         gl.useProgram(shaderProgramDrawLine);
 
         if (gauss) {
-            // 启用混合并设置为加法混合
             gl.enable(gl.BLEND);
-            gl.blendFunc(gl.ONE, gl.ONE); // 加法混合
+            gl.blendFunc(gl.ONE, gl.ONE); // add
         } else {
-            // 禁用混合，直接覆盖
-            gl.disable(gl.BLEND);
+            gl.disable(gl.BLEND); // overwrite
         }
         // 传递统一变量到片元着色器
         gl.uniform1i(shaderProgramDrawLine.uEnableBlend, gauss ? 1 : 0);
@@ -567,7 +565,7 @@ var transform = [1, 0, 0, 1, 0, 0];
         gl.disableVertexAttribArray(shaderProgramDrawLine.colorAttribute);
         gl.disableVertexAttribArray(shaderProgramDrawLine.vertexPositionAttribute);
 
-        // 确保绘制操作后恢复混合状态
+        // disable blend after drawing
         if (gauss) {
             gl.disable(gl.BLEND);
         }
