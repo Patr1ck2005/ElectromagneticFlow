@@ -95,7 +95,8 @@ var transform = [1, 0, 0, 1, 0, 0];
     	shaderProgramAcoustic.stepSizeYUniform = gl.getUniformLocation(shaderProgramAcoustic, "stepSizeY");
 
     	shaderProgramDraw = initShader("shader-draw-fs", "shader-draw-vs");
-    	shaderProgramDrawLine = initShader("shader-draw-line-fs", "shader-draw-vs");
+    	shaderProgramDrawLine = initShader("shader-draw-line-fs", "shader-draw-vs", null);
+    	shaderProgramDrawLineTransparent = initShader("shader-draw-line-fs", "shader-draw-vs", "#define Multiplicity 1\n");
     	shaderProgramMode = initShader("shader-mode-fs", "shader-draw-vs");
     	shaderProgramPoke = initShader("shader-poke-fs", "shader-vs");
 
@@ -351,7 +352,7 @@ var transform = [1, 0, 0, 1, 0, 0];
         gl.useProgram(prog);
         var rttFramebuffer = renderTexture1.framebuffer;
         gl.viewport(0, 0, rttFramebuffer.width, rttFramebuffer.height);
-    	gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    	gl.clearColor(0.0, 0.0, 0.0, 0.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         mat4.identity(pMatrix);
@@ -361,16 +362,15 @@ var transform = [1, 0, 0, 1, 0, 0];
 
         gl.bindBuffer(gl.ARRAY_BUFFER, simVertexPositionBuffer);
         gl.vertexAttribPointer(prog.vertexPositionAttribute, simVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(prog.vertexPositionAttribute);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, simVertexTextureCoordBuffer);
         gl.vertexAttribPointer(prog.textureCoordAttribute, simVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-        gl.enableVertexAttribArray(prog.dampingAttribute);
-        gl.enableVertexAttribArray(prog.vertexPositionAttribute);
         gl.enableVertexAttribArray(prog.textureCoordAttribute);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, simVertexDampingBuffer);
         gl.vertexAttribPointer(prog.dampingAttribute, simVertexDampingBuffer.itemSize, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(prog.dampingAttribute);
 
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, renderTexture2.texture);
@@ -527,7 +527,19 @@ var transform = [1, 0, 0, 1, 0, 0];
     }
 
     function drawLineSource(x, y, x2, y2, f, gauss) {
+        shaderProgramDrawLine.uEnableBlend = gl.getUniformLocation(shaderProgramDrawLine, "uEnableBlend");
         gl.useProgram(shaderProgramDrawLine);
+
+        if (gauss) {
+            // 启用混合并设置为加法混合
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.ONE, gl.ONE); // 加法混合
+        } else {
+            // 禁用混合，直接覆盖
+            gl.disable(gl.BLEND);
+        }
+        // 传递统一变量到片元着色器
+        gl.uniform1i(shaderProgramDrawLine.uEnableBlend, gauss ? 1 : 0);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, sourceBuffer);
         srcCoords[0] = x;
@@ -555,6 +567,11 @@ var transform = [1, 0, 0, 1, 0, 0];
         gl.drawArrays(gl.LINES, 0, 2);
         gl.disableVertexAttribArray(shaderProgramDrawLine.colorAttribute);
         gl.disableVertexAttribArray(shaderProgramDrawLine.vertexPositionAttribute);
+
+        // 确保绘制操作后恢复混合状态
+        if (gauss) {
+            gl.disable(gl.BLEND);
+        }
     }
 
     function drawPhasedArray(x, y, x2, y2, f1, f2) {

@@ -147,9 +147,15 @@
 
         //varying vec4 vPosition;
         varying vec4 vColor;
+        uniform bool uEnableBlend;
 
         void main(void) {
-            gl_FragColor = vec4(vColor.r * exp(-vColor.a*vColor.a), 0., 1., 1.);
+            if (uEnableBlend) {
+                gl_FragColor = vec4(vColor.r * exp(-vColor.a * vColor.a), 0.0, 0.0, 0.0);
+            } else {
+                // 直接覆盖
+                gl_FragColor = vec4(vColor.r * exp(-vColor.a * vColor.a), 0.0, 1.0, 1.0);
+            }
         }
     </script>
 
