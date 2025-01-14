@@ -210,6 +210,7 @@
                 dampingindex = pv.a; // 读取透明度通道中的 dampingindex
                 newderivative = speedindex*(mid-amplitude)+derivative*vDamping*dampingindex;
                 newamplitude = amplitude+newderivative;
+                // newamplitude = amplitude+0.5*speedindex*(mid-amplitude); // thermal conduct simulation
         }
         // update wave amplitude and derivative
         gl_FragColor = vec4(newamplitude, newderivative, pv.b, pv.a);
