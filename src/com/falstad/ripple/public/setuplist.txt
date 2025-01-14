@@ -73,3 +73,5 @@ gradient4.txt Temperature Gradient 4
 reciprocity.txt Reciprocity
 rotating.txt Rotating Source
 pyramid.txt Step Pyramid Reflections
+interferenceLine.txt Line Source Interference
+bessel_beam.txt Bessel Beam
