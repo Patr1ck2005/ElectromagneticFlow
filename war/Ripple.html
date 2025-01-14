@@ -98,6 +98,7 @@
 		else {
 			// red channel used to store wave height
 			float r =  textureColor.r*brightness;
+			// float r =  (textureColor.r*textureColor.r+textureColor.b*textureColor.g*textureColor.g)*brightness; // render energy density
 	        r = clamp(r, -1., 1.);
             if (r > 0.0)
             	col = mix(mix(colors[TS_COL_MED], colors[TS_COL_NEUTRAL], med),
