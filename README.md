@@ -1,4 +1,7 @@
 # ripplegl
+
+This is my ripple project forked by pfalstad. This version of ripple will be more focused on Photonics Research as well as scientific education.
+
 Ripple Tank, webgl version
 
 ## Introduction
