@@ -1,7 +1,7 @@
 
 var gl;
 var canvas;
-var gridSizeX =1024, gridSizeY =1024, windowOffsetX =40, windowOffsetY =40;
+var gridSizeX, gridSizeY, windowOffsetX, windowOffsetY;
 var windowWidth, windowHeight, viewAngle, viewHeight;
 var sim;
 var damping;
@@ -45,7 +45,7 @@ var transform = [1, 0, 0, 1, 0, 0];
     }
 
 
-    var shaderProgramMain, shaderProgramFixed, shaderProgramAcoustic, shaderProgramDraw, shaderProgramMode, shaderProgramPoke;
+    var shaderProgramMain, shaderProgram3D, shaderProgramFixed, shaderProgramAcoustic, shaderProgramDraw, shaderProgramDrawLine, shaderProgramMode, shaderProgramPoke;
 
     function initShader(fs, vs, prefix) {
         var fragmentShader = getShader(gl, fs, prefix);
@@ -96,7 +96,6 @@ var transform = [1, 0, 0, 1, 0, 0];
 
     	shaderProgramDraw = initShader("shader-draw-fs", "shader-draw-vs");
     	shaderProgramDrawLine = initShader("shader-draw-line-fs", "shader-draw-vs", null);
-    	shaderProgramDrawLineTransparent = initShader("shader-draw-line-fs", "shader-draw-vs", "#define Multiplicity 1\n");
     	shaderProgramMode = initShader("shader-mode-fs", "shader-draw-vs");
     	shaderProgramPoke = initShader("shader-poke-fs", "shader-vs");
 
@@ -330,7 +329,7 @@ var transform = [1, 0, 0, 1, 0, 0];
     		simTextureCoord.push(xi/gridSizeX, yi/gridSizeY);
     		var damp = damping;
     		if (xi == 1 || yi == 1 || xi == gridSizeX-2 || yi == gridSizeY-2)
-    			damp *= .999-8*.01; // was 20
+    			damp *= .88; // was 20
     		simDamping.push(damp);
     	}
     }
@@ -951,7 +950,7 @@ var transform = [1, 0, 0, 1, 0, 0];
         gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
         gl.vertexAttribPointer(shaderProgramMode.colorAttribute, colorBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        
+
         loadMatrix(pMatrix);
         setMatrixUniforms(shaderProgramMode);
         gl.enableVertexAttribArray(shaderProgramMode.vertexPositionAttribute);
@@ -1017,7 +1016,7 @@ var transform = [1, 0, 0, 1, 0, 0];
         // draw result
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgramMain.vertexPositionAttribute, vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        
+
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexTextureCoordBuffer);
         gl.vertexAttribPointer(shaderProgramMain.textureCoordAttribute, vertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
@@ -1054,7 +1053,7 @@ var transform = [1, 0, 0, 1, 0, 0];
         mat4.translate(mvMatrix, [0, 0, -3.2]);
         mat4.multiply(mvMatrix, matrix3d, mvMatrix);
         mat4.scale(mvMatrix, [zoom3d, zoom3d, zoom3d]);
-        
+
 	// draw result
         gl.bindBuffer(gl.ARRAY_BUFFER, screen3DTextureBuffer);
         gl.vertexAttribPointer(shaderProgram3D.textureCoordAttribute, screen3DTextureBuffer.itemSize, gl.FLOAT, false, 0, 0);

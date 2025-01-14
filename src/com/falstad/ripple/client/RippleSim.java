@@ -101,7 +101,7 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
 	public static final double freqMult = .0233333 * 5;
 
 	public String getAppletInfo() {
-		return "Ripple by Paul Falstad";
+		return "Ripple by Paul Falstad; Promoted by Keren Wang";
 	}
 
 	// Container main;

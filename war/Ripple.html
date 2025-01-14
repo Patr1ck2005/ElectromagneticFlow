@@ -188,6 +188,11 @@
         highp float getSquare(highp vec2 offset)
         {
             highp vec2 x = offset+vTextureCoord;
+
+            // periodical boundary condition
+            // if(x.x < 0.25) x.x += 0.5;
+            // if(x.x > 0.75) x.x -= 0.5;
+
             highp vec4 pv = texture2D(uSampler, x);
             if (pv.b > 0.0)
                return pv.r;
@@ -265,7 +270,7 @@
             vPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
             gl_Position = uPMatrix * vPosition;
             vTextureCoord = aTextureCoord;
-        vDamping = aDamping;
+        vDamping = sqrt(aDamping);
         }
     </script>
 

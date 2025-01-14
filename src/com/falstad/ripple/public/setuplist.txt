@@ -1,4 +1,5 @@
 ### setuplist.txt first line must be a comment
+blank.txt Blank
 1source.txt Single Source
 2sources.txt Two Sources
 4sources.txt Four Sources
