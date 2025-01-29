@@ -184,8 +184,8 @@
         uniform float stepSizeX;
         uniform float stepSizeY;
 
-        // get wave value for adjacent square, handling walls properly depending on acoustic flag
-        highp float getSquare(highp vec2 offset)
+        // get wave amplitude for adjacent square, handling walls properly depending on acoustic flag
+        highp float getAmplitudeSquare(highp vec2 offset)
         {
             highp vec2 x = offset+vTextureCoord;
 
@@ -203,6 +203,19 @@
     #endif
         }
 
+        // get medium speedIndex for adjacent square, handling walls properly depending on acoustic flag
+        highp float getSpeedSquare(highp vec2 offset)
+        {
+            highp vec2 x = offset+vTextureCoord;
+
+            // periodical boundary condition
+            // if(x.x < 0.25) x.x += 0.5;
+            // if(x.x > 0.75) x.x -= 0.5;
+
+            highp vec4 pv = texture2D(uSampler, x);
+            return pv.b;
+        }
+
     void main()
     {
         highp float newderivative = 0.;
@@ -212,17 +225,23 @@
         if (pv.b != 0.0) {
                 highp float amplitude = pv.r;  // amplitude of field U
                 highp float derivative = pv.g;  // time derivative of field U
-                highp float mid1 = getSquare(vec2(stepSizeX, 0.));
-                highp float mid2 = getSquare(vec2(-stepSizeX, 0.));
-                highp float mid3 = getSquare(vec2(0., stepSizeY));
-                highp float mid4 = getSquare(vec2(0., -stepSizeY));
-                highp float spatial_variance = .25*(mid1+mid2+mid3+mid4)-amplitude; // standard laplace factor of field U
                 highp float speedindex = pv.b; // square of refractive index
                 speedindex *= 1.5; // Unnecessary scale factor to correct unit mismatch, ensuring front-end light speed is accurately 299792458 m/s
+                highp float mid1 = getAmplitudeSquare(vec2(stepSizeX, 0.));
+                highp float mid2 = getAmplitudeSquare(vec2(-stepSizeX, 0.));
+                highp float mid3 = getAmplitudeSquare(vec2(0., stepSizeY));
+                highp float mid4 = getAmplitudeSquare(vec2(0., -stepSizeY));
+                highp float AvgSpeedIndexRight = (speedindex+getSpeedSquare(vec2(stepSizeX, 0.)))*0.5;
+                highp float AvgSpeedIndexLeft = (speedindex+getSpeedSquare(vec2(-stepSizeX, 0.)))*0.5;
+                highp float AvgSpeedIndexUp = (speedindex+getSpeedSquare(vec2(0., stepSizeY)))*0.5;
+                highp float AvgSpeedIndexDown = (speedindex+getSpeedSquare(vec2(0., -stepSizeY)))*0.5;
+                highp float spatial_variance_factor =
+                AvgSpeedIndexRight*(mid1-amplitude)-AvgSpeedIndexLeft*(amplitude-mid2)+AvgSpeedIndexUp*(mid3-amplitude)-AvgSpeedIndexDown*(amplitude-mid4); // Spatial variance with speedIndex factor of electromagnetic field U
+                // highp float spatial_variance_factor = speedindex*(.25*(mid1+mid2+mid3+mid4)-amplitude); // standard laplace factor of scalar field U (* speedIndex factor)
                 dampingindex = pv.a; // 读取透明度通道中的 dampingindex
-                newderivative = speedindex*(spatial_variance)+derivative*vDamping*dampingindex;
+                newderivative = spatial_variance_factor+derivative*vDamping*dampingindex;
                 newamplitude = amplitude+0.5*0.5*newderivative;
-                // newamplitude = amplitude+0.5*speedindex*(spatial_variance); // thermal conduct simulation
+                // newamplitude = amplitude+0.5*spatial_variance_factor; // thermal conduct simulation
         }
         // update wave amplitude and derivative
         gl_FragColor = vec4(newamplitude, newderivative, pv.b, pv.a);
