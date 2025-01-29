@@ -36,16 +36,6 @@ public class MediumBox extends RectDragObject {
 		}
 		else dampingIndex = 1.; //to consist with old String token which has no dampingIndex information
 	}
-	
-//	MediumBox(int x, int y, int x2, int y2) {
-//		speedIndex = .25;
-//		dampingIndex = 1.;
-//		topLeft.x = bottomLeft.x = x;
-//		topLeft.y = topRight.y = y;
-//		topRight.x = bottomRight.x = x2;
-//		bottomLeft.y = bottomRight.y = y2;
-//		setTransform();
-//	} // no usage
 
 	void prepare() {
 		RippleSim.drawMedium(topLeft.x, topLeft.y, topRight.x, topRight.y, 
@@ -60,7 +50,7 @@ public class MediumBox extends RectDragObject {
 
     public EditInfo getEditInfo(int n) {
         if (n == 0)
-            return new EditInfo("Refractive Index (0.85-4)", Math.sqrt(1/speedIndex), 0, 1).
+            return new EditInfo("Refractive Index (<=4)", Math.sqrt(1/speedIndex), 0, 1).
                 setDimensionless();
 		if (n == 1)
 			return new EditInfo("Damping Index (0.9-1.1)", dampingIndex, 0, 1).
@@ -79,14 +69,14 @@ public class MediumBox extends RectDragObject {
 		}
     }
 
-    static double getSpeedIndex(double v) {
-		if (v <= 0.)
+    static double getSpeedIndex(double n) {
+		if (n == 0.)
 			return 0.;
-    	if (v < .85)
-    		v = .85;
-    	if (v > 4)
-    		v = 4;
-    	return 1/(v*v);
+    	if (n < .85)
+    		n = .85;
+    	if (n > 4)
+    		n = 4;
+    	return 1/(n*n);
     }
     
 	int getDumpType() { return 'm'; }

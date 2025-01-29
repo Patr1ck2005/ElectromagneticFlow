@@ -29,7 +29,7 @@ public class PMLLayer extends MediumBox {
     @Override
     public EditInfo getEditInfo(int n) {
         if (n == 0) {
-            return new EditInfo("Refractive Index (1-2)", Math.sqrt(1/speedIndex), 0, 1).
+            return new EditInfo("Refractive Index (<=4)", Math.sqrt(1/speedIndex), 0, 1).
                     setDimensionless();
         } else if (n == 1) {
             return new EditInfo("Damping Index (0.5-1.0)", dampingIndex, 0, 1).

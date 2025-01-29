@@ -53,7 +53,7 @@ public class TimeCrystalMediumBox extends MediumBox {
     @Override
     public EditInfo getEditInfo(int n) {
         if (n == 0) {
-            return new EditInfo("Dielectric Epsilon (1-2)", Math.pow(1/speedIndex, 0.25), 0, 1)
+            return new EditInfo("Dielectric Epsilon (<=4)", Math.pow(1/speedIndex, 0.25), 0, 1)
                     .setDimensionless();
         } else if (n == 1) {
             return new EditInfo("Amplitude", amplitude, 0, 1)

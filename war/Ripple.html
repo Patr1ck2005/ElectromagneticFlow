@@ -110,7 +110,7 @@
         // read damping value from alpha channel (gray-scale representation of damping)
         float damping = textureColor.a; // Damping value
         // Adjust brightness based on damping value
-        col *= damping; // Reduce brightness proportionally to damping
+        // col *= damping; // Reduce brightness proportionally to damping
         gl_FragColor = vec4(col, 1.0); // Output the final color
         }
     </script>
@@ -194,7 +194,7 @@
             // if(x.x > 0.75) x.x -= 0.5;
 
             highp vec4 pv = texture2D(uSampler, x);
-            if (pv.b > 0.0)
+            if (pv.b != 0.0)
                return pv.r;
     #ifdef ACOUSTIC
             return texture2D(uSampler, vTextureCoord-offset).r;
@@ -209,20 +209,20 @@
         highp float newamplitude = 0.;
         highp float dampingindex = 1.;
         highp vec4 pv = texture2D(uSampler, vTextureCoord);
-        if (pv.b > 0.0) {
-                highp float amplitude = pv.r;
-                highp float derivative = pv.g;
+        if (pv.b != 0.0) {
+                highp float amplitude = pv.r;  // amplitude of field U
+                highp float derivative = pv.g;  // time derivative of field U
                 highp float mid1 = getSquare(vec2(stepSizeX, 0.));
                 highp float mid2 = getSquare(vec2(-stepSizeX, 0.));
                 highp float mid3 = getSquare(vec2(0., stepSizeY));
                 highp float mid4 = getSquare(vec2(0., -stepSizeY));
-                highp float mid = .25*(mid1+mid2+mid3+mid4); // equilibrium position is average of neighbors
+                highp float spatial_variance = .25*(mid1+mid2+mid3+mid4)-amplitude; // standard laplace factor of field U
                 highp float speedindex = pv.b; // square of refractive index
-                speedindex *= 1.5; // Scale factor to correct unit mismatch, ensuring front-end light speed is accurately 299792458 m/s
+                speedindex *= 1.5; // Unnecessary scale factor to correct unit mismatch, ensuring front-end light speed is accurately 299792458 m/s
                 dampingindex = pv.a; // 读取透明度通道中的 dampingindex
-                newderivative = speedindex*(mid-amplitude)+derivative*vDamping*dampingindex;
-                newamplitude = amplitude+newderivative;
-                // newamplitude = amplitude+0.5*speedindex*(mid-amplitude); // thermal conduct simulation
+                newderivative = speedindex*(spatial_variance)+derivative*vDamping*dampingindex;
+                newamplitude = amplitude+0.5*0.5*newderivative;
+                // newamplitude = amplitude+0.5*speedindex*(spatial_variance); // thermal conduct simulation
         }
         // update wave amplitude and derivative
         gl_FragColor = vec4(newamplitude, newderivative, pv.b, pv.a);
