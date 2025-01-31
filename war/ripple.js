@@ -73,6 +73,9 @@ var transform = [1, 0, 0, 1, 0, 0];
         shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
         shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
 
+        // 在初始化着色器时添加参数纹理的uniform位置
+        shaderProgram.paramSamplerUniform = gl.getUniformLocation(shaderProgram, "uParameters");
+
         return shaderProgram;
     }
 
@@ -112,6 +115,35 @@ var transform = [1, 0, 0, 1, 0, 0];
     function initTextures() {
     }
 
+    var parameterTexture; // 存储折射率和阻尼的纹理
+
+    function initParameterTexture() {
+        var fb = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fb);
+        fb.width = gridSizeX;
+        fb.height = gridSizeY;
+
+        var tex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        // 使用RGBA格式，蓝色通道存折射率，透明通道存阻尼
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gridSizeX, gridSizeY, 0, gl.RGBA, gl.FLOAT, null);
+
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+
+        // 初始化默认值（折射率1.0，阻尼系数1.0）
+        // gl.clearColor(0.0, 0.0, 1.0, 1.0);
+        // gl.clear(gl.COLOR_BUFFER_BIT);
+
+        gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+        return { framebuffer: fb, texture: tex };
+    }
 
     var mvMatrix = mat4.create();
     var mvMatrixStack = [];
@@ -188,19 +220,19 @@ var transform = [1, 0, 0, 1, 0, 0];
           return null;
         }
 
-	while(gl.getError() != gl.NO_ERROR) { }
-	var pixels = new Float32Array(4);
-	gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.FLOAT, pixels);
-	if (gl.getError() != gl.NO_ERROR)
-	    console.log("readPixels failed");
-	else
-	    sim.readPixelsWorks = true;
+        while(gl.getError() != gl.NO_ERROR) { }
+        var pixels = new Float32Array(4);
+        gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.FLOAT, pixels);
+        if (gl.getError() != gl.NO_ERROR)
+            console.log("readPixels failed");
+        else
+            sim.readPixelsWorks = true;
 
-    	gl.bindTexture(gl.TEXTURE_2D, null);
-    	gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-    	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-    	return {framebuffer:rttFramebuffer, texture:rttTexture};
+            return {framebuffer:rttFramebuffer, texture:rttTexture};
     }
 
     function deleteRenderTexture(rt) {
@@ -386,6 +418,10 @@ var transform = [1, 0, 0, 1, 0, 0];
         gl.uniform1i(prog.samplerUniform, 0);
         gl.uniform1f(prog.stepSizeXUniform, 1/gridSizeX);
         gl.uniform1f(prog.stepSizeYUniform, 1/gridSizeY);
+
+        gl.activeTexture(gl.TEXTURE1); // 使用纹理单元1
+        gl.bindTexture(gl.TEXTURE_2D, parameterTexture.texture);
+        gl.uniform1i(prog.paramSamplerUniform, 1);
 
         setMatrixUniforms(prog);
         gl.drawArrays(gl.TRIANGLES, 0, simVertexPositionBuffer.numItems);
@@ -636,12 +672,13 @@ var transform = [1, 0, 0, 1, 0, 0];
     	                    transform[2], transform[5], 0, 1], mtx);
     }
 
-    function setupForDrawing(v) {
+    // 重命名函数为 setupForParametersDrawing
+    function setupForParametersDrawing(v) {
         if (sim.drawingSelection > 0) {
        		gl.vertexAttrib4f(shaderProgramDraw.colorAttribute, sim.drawingColor[0]*sim.drawingSelection, sim.drawingColor[1]*sim.drawingSelection,
 				sim.drawingColor[2]*sim.drawingSelection, sim.drawingColor[3]);
         } else {
-    		var rttFramebuffer = renderTexture1.framebuffer;
+    		var rttFramebuffer = parameterTexture.framebuffer;
     		gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
     		gl.viewport(0, 0, rttFramebuffer.width, rttFramebuffer.height);
             gl.useProgram(shaderProgramDraw);
@@ -674,7 +711,7 @@ var transform = [1, 0, 0, 1, 0, 0];
     }
 
     function drawWall(x, y, x2, y2, v) {
-    	setupForDrawing(v);
+    	setupForParametersDrawing(v);
         gl.bindBuffer(gl.ARRAY_BUFFER, sourceBuffer);
         // draw line back on itself, or else one endpoint won't be drawn
         srcCoords = thickLinePoints([x, y, x2, y2, x, y], 1.5);
@@ -695,7 +732,7 @@ var transform = [1, 0, 0, 1, 0, 0];
     }
 
     function drawEllipse(cx, cy, xr, yr) {
-    	setupForDrawing(0);
+    	setupForParametersDrawing(0);
         gl.bindBuffer(gl.ARRAY_BUFFER, sourceBuffer);
         var coords = [];
         var i;
@@ -725,7 +762,7 @@ var transform = [1, 0, 0, 1, 0, 0];
     }
 
     function drawParabola(x1, y1, w, h) {
-    	setupForDrawing(0);
+    	setupForParametersDrawing(0);
         gl.bindBuffer(gl.ARRAY_BUFFER, sourceBuffer);
         var coords = [];
         var i;
@@ -753,7 +790,7 @@ var transform = [1, 0, 0, 1, 0, 0];
     }
 
     function drawLens(x1, y1, w, h, m) {
-    	setupForDrawing(m);
+    	setupForParametersDrawing(m);
         gl.bindBuffer(gl.ARRAY_BUFFER, sourceBuffer);
         var i;
         var w2 = w/2;
@@ -779,7 +816,7 @@ var transform = [1, 0, 0, 1, 0, 0];
     }
 
     function drawSolidEllipse(cx, cy, xr, yr, med) {
-    	setupForDrawing(med);
+    	setupForParametersDrawing(med);
         gl.bindBuffer(gl.ARRAY_BUFFER, sourceBuffer);
         var coords = [cx, cy];
         var i;
@@ -804,11 +841,11 @@ var transform = [1, 0, 0, 1, 0, 0];
     }
 
     function drawMedium(x, y, x2, y2, x3, y3, x4, y4, m1, m2, k1, k2) {
-		var rttFramebuffer = renderTexture1.framebuffer;
+		var rttFramebuffer = parameterTexture.framebuffer;
 		gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
 		gl.viewport(0, 0, rttFramebuffer.width, rttFramebuffer.height);
 		gl.colorMask(false, false, true, true);
-//		gl.clear(gl.COLOR_BUFFER_BIT);
+		// gl.clear(gl.COLOR_BUFFER_BIT);
         gl.useProgram(shaderProgramDraw);
 
         var medCoords = [x, y, x2, y2, x3, y3, x4, y4];
@@ -840,94 +877,94 @@ var transform = [1, 0, 0, 1, 0, 0];
     }
 
     function drawPML(x1, y1, x2, y2, x3, y3, x4, y4, med, k_max, f, n) {
-    // Step 1: 初始化绘制设置
-    setupForDrawing(med); // 设置波速为 med
+        // Step 1: 初始化绘制设置
+        setupForParametersDrawing(med); // 设置波速为 med
 
-    // Step 2: 计算宽度和高度
-    var width = Math.abs(x2 - x1);
-    var height = Math.abs(y3 - y1);
-    var halfWidth = width / 2;
+        // Step 2: 计算宽度和高度
+        var width = Math.abs(x2 - x1);
+        var height = Math.abs(y3 - y1);
+        var halfWidth = width / 2;
 
-    // Step 3: 定义阻尼计算函数
-    function computeDamping(yNormalized) {
-        // yNormalized 应该在 [0, 1] 之间，从上到下递增
-        var damping = 1-(1-k_max) * Math.pow(yNormalized, n);
-        return damping;
+        // Step 3: 定义阻尼计算函数
+        function computeDamping(yNormalized) {
+            // yNormalized 应该在 [0, 1] 之间，从上到下递增
+            var damping = 1-(1-k_max) * Math.pow(yNormalized, n);
+            return damping;
+        }
+
+        // Step 4: 生成顶点坐标和颜色
+        var coords = [];
+        var colors = [];
+
+        // 中心点（顶点1）
+        var centerX = x1 + halfWidth;
+        var centerY = y1 + height / 2;
+        coords.push(centerX, centerY);
+        colors.push(0.0, 0.0, med, 0.0); // 中心点无阻尼
+
+        // 生成沿 y 方向的顶点（从顶部到底部）
+        var numSegments = height; // 每个像素一个分段，可以根据需要调整
+        for (var i = 0; i <= numSegments; i++) {
+            var yOffset = i; // 从 0 到 height
+            var yNormalized = yOffset / height; // 归一化到 [0, 1]
+
+            // 左侧顶点
+            var currentXLeft = x1;
+            var currentY = y1 + yOffset;
+            coords.push(currentXLeft, currentY);
+
+            var dampingLeft = computeDamping(yNormalized);
+            colors.push(0.0, 0.0, med, dampingLeft); // R=0, G=0, B=med, A=damping
+
+            // 右侧顶点
+            var currentXRight = x2;
+            coords.push(currentXRight, currentY);
+
+            var dampingRight = computeDamping(yNormalized);
+            colors.push(0.0, 0.0, med, dampingRight); // R=0, G=0, B=med, A=damping
+        }
+
+        // Step 5: 绑定顶点坐标到缓冲区
+        gl.bindBuffer(gl.ARRAY_BUFFER, sourceBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(
+            shaderProgramDraw.vertexPositionAttribute,
+            2, // 每个顶点有两个分量 (x, y)
+            gl.FLOAT,
+            false,
+            0,
+            0
+        );
+
+        // Step 6: 绑定颜色数据到缓冲区
+        gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+        gl.vertexAttribPointer(
+            shaderProgramDraw.colorAttribute,
+            4, // 每个颜色有四个分量 (R, G, B, A)
+            gl.FLOAT,
+            false,
+            0,
+            0
+        );
+
+        // Step 7: 设置矩阵并启用属性
+        loadMatrix(pMatrix);
+        setMatrixUniforms(shaderProgramDraw);
+
+        gl.enableVertexAttribArray(shaderProgramDraw.vertexPositionAttribute);
+        gl.enableVertexAttribArray(shaderProgramDraw.colorAttribute);
+
+        // Step 8: 绘制 PML 区域
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, coords.length / 2);
+
+        // Step 9: 禁用属性并恢复状态
+        gl.disableVertexAttribArray(shaderProgramDraw.vertexPositionAttribute);
+        gl.disableVertexAttribArray(shaderProgramDraw.colorAttribute);
+
+        gl.colorMask(true, true, true, true);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
-
-    // Step 4: 生成顶点坐标和颜色
-    var coords = [];
-    var colors = [];
-
-    // 中心点（顶点1）
-    var centerX = x1 + halfWidth;
-    var centerY = y1 + height / 2;
-    coords.push(centerX, centerY);
-    colors.push(0.0, 0.0, med, 0.0); // 中心点无阻尼
-
-    // 生成沿 y 方向的顶点（从顶部到底部）
-    var numSegments = height; // 每个像素一个分段，可以根据需要调整
-    for (var i = 0; i <= numSegments; i++) {
-        var yOffset = i; // 从 0 到 height
-        var yNormalized = yOffset / height; // 归一化到 [0, 1]
-
-        // 左侧顶点
-        var currentXLeft = x1;
-        var currentY = y1 + yOffset;
-        coords.push(currentXLeft, currentY);
-
-        var dampingLeft = computeDamping(yNormalized);
-        colors.push(0.0, 0.0, med, dampingLeft); // R=0, G=0, B=med, A=damping
-
-        // 右侧顶点
-        var currentXRight = x2;
-        coords.push(currentXRight, currentY);
-
-        var dampingRight = computeDamping(yNormalized);
-        colors.push(0.0, 0.0, med, dampingRight); // R=0, G=0, B=med, A=damping
-    }
-
-    // Step 5: 绑定顶点坐标到缓冲区
-    gl.bindBuffer(gl.ARRAY_BUFFER, sourceBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coords), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(
-        shaderProgramDraw.vertexPositionAttribute,
-        2, // 每个顶点有两个分量 (x, y)
-        gl.FLOAT,
-        false,
-        0,
-        0
-    );
-
-    // Step 6: 绑定颜色数据到缓冲区
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-    gl.vertexAttribPointer(
-        shaderProgramDraw.colorAttribute,
-        4, // 每个颜色有四个分量 (R, G, B, A)
-        gl.FLOAT,
-        false,
-        0,
-        0
-    );
-
-    // Step 7: 设置矩阵并启用属性
-    loadMatrix(pMatrix);
-    setMatrixUniforms(shaderProgramDraw);
-
-    gl.enableVertexAttribArray(shaderProgramDraw.vertexPositionAttribute);
-    gl.enableVertexAttribArray(shaderProgramDraw.colorAttribute);
-
-    // Step 8: 绘制 PML 区域
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, coords.length / 2);
-
-    // Step 9: 禁用属性并恢复状态
-    gl.disableVertexAttribArray(shaderProgramDraw.vertexPositionAttribute);
-    gl.disableVertexAttribArray(shaderProgramDraw.colorAttribute);
-
-    gl.colorMask(true, true, true, true);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-}
 
     function drawModes(x, y, x2, y2, a, b, c, d) {
 		var rttFramebuffer = renderTexture1.framebuffer;
@@ -973,7 +1010,7 @@ var transform = [1, 0, 0, 1, 0, 0];
 
 
     function drawTriangle(x, y, x2, y2, x3, y3, m) {
-		var rttFramebuffer = renderTexture1.framebuffer;
+		var rttFramebuffer = parameterTexture.framebuffer;
 		gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
 		gl.viewport(0, 0, rttFramebuffer.width, rttFramebuffer.height);
 		gl.colorMask(false, false, true, true);
@@ -1033,6 +1070,11 @@ var transform = [1, 0, 0, 1, 0, 0];
         gl.uniform1i(shaderProgramMain.samplerUniform, 0);
         gl.uniform1f(shaderProgramMain.brightnessUniform, bright);
         gl.uniform3fv(shaderProgramMain.colorsUniform, colors);
+
+        // 新增：绑定参数纹理到TEXTURE1
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, parameterTexture.texture);
+        gl.uniform1i(gl.getUniformLocation(shaderProgramMain, "uParameters"), 1);
 
         setMatrixUniforms(shaderProgramMain);
         gl.enableVertexAttribArray(shaderProgramMain.vertexPositionAttribute);
@@ -1099,6 +1141,9 @@ var transform = [1, 0, 0, 1, 0, 0];
     	gridSizeX = gridSizeY = 1024;
     	windowOffsetX = windowOffsetY = 40;
     	fbType = 0;
+
+        // 再初始化参数纹理
+        parameterTexture = initParameterTexture();
     	renderTexture2 = initTextureFramebuffer();
     	if (!renderTexture2) {
     		// float didn't work, try half float
@@ -1117,7 +1162,7 @@ var transform = [1, 0, 0, 1, 0, 0];
 		mat4.rotateX(matrix3d, -Math.PI/3);
 
 //    	drawWalls(renderTexture1);
-
+        // ???
     	gl.clearColor(0.0, 0.0, 1.0, 1.0);
 
 	sim.readPixelsWorks = false;
@@ -1135,8 +1180,10 @@ var transform = [1, 0, 0, 1, 0, 0];
     		windowHeight = gridSizeY-windowOffsetY*2;
     		deleteRenderTexture(renderTexture1);
     		deleteRenderTexture(renderTexture2);
+    		deleteRenderTexture(parameterTexture);
     		renderTexture2 = initTextureFramebuffer();
     		renderTexture1 = initTextureFramebuffer();
+            parameterTexture = initParameterTexture()
     		initBuffers();
     	}
     	sim.drawSource = function (x, y, f) { drawSource(x, y, f); }
@@ -1166,13 +1213,13 @@ var transform = [1, 0, 0, 1, 0, 0];
     		gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
     		gl.viewport(0, 0, rttFramebuffer.width, rttFramebuffer.height);
     		gl.colorMask(true, true, false, false);
-        	gl.clearColor(0.0, 0.0, 1.0, 1.0);
+        	gl.clearColor(0.0, 0.0, 0.0, 0.0);
     		gl.clear(gl.COLOR_BUFFER_BIT);
     		gl.colorMask(true, true, true, true);
     		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     	}
     	sim.doBlankWalls = function () {
-    		var rttFramebuffer = renderTexture1.framebuffer;
+    		var rttFramebuffer = parameterTexture.framebuffer;
     		gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
     		gl.viewport(0, 0, rttFramebuffer.width, rttFramebuffer.height);
     		gl.colorMask(false, false, true, true);

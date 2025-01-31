@@ -82,6 +82,8 @@
         varying vec4 vPosition;
 
         uniform sampler2D uSampler;
+        uniform sampler2D uParameters; // 新增参数纹理
+
         uniform float brightness;
         uniform lowp vec3 colors[TS_COL_COUNT];
 
@@ -89,9 +91,10 @@
         void main(void) {
         float alpha = 1.0;
         vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+        vec4 materialColor = texture2D(uParameters, vec2(vTextureCoord.s, vTextureCoord.t));
 
         // blue channel used to store walls/media
-		float med = textureColor.b;
+		float med = materialColor.b;
 		vec3 col;
 		if (med == 0.0)
 			col = colors[TS_COL_WALL];
@@ -108,9 +111,9 @@
                 		    mix(colors[TS_COL_NEG_MED], colors[TS_COL_NEG], med), -r);
 		}
         // read damping value from alpha channel (gray-scale representation of damping)
-        float damping = textureColor.a; // Damping value
+        float damping = materialColor.a; // Damping value
         // Adjust brightness based on damping value
-        // col *= damping; // Reduce brightness proportionally to damping
+        col *= damping; // Reduce brightness proportionally to damping
         gl_FragColor = vec4(col, 1.0); // Output the final color
         }
     </script>
@@ -181,6 +184,7 @@
         varying float vDamping;
 
         uniform sampler2D uSampler;
+        uniform sampler2D uParameters; // 新增参数纹理
         uniform float stepSizeX;
         uniform float stepSizeY;
 
@@ -194,13 +198,14 @@
             // if(x.x > 0.75) x.x -= 0.5;
 
             highp vec4 pv = texture2D(uSampler, x);
-            if (pv.b != 0.0)
+            highp vec4 material_paras = texture2D(uParameters, vTextureCoord);
+            if (material_paras.b != 0.0)
                return pv.r;
-    #ifdef ACOUSTIC
-            return texture2D(uSampler, vTextureCoord-offset).r;
-    #else
-            return 0.0;
-    #endif
+            #ifdef ACOUSTIC
+                return texture2D(uSampler, vTextureCoord-offset).r;
+            #else
+                return 0.0;
+            #endif
         }
 
         // get medium speedIndex for adjacent square, handling walls properly depending on acoustic flag
@@ -212,8 +217,8 @@
             // if(x.x < 0.25) x.x += 0.5;
             // if(x.x > 0.75) x.x -= 0.5;
 
-            highp vec4 pv = texture2D(uSampler, x);
-            return pv.b;
+            highp vec4 material_paras = texture2D(uParameters, x);
+            return material_paras.b;
         }
 
     void main()
@@ -222,10 +227,11 @@
         highp float newamplitude = 0.;
         highp float dampingindex = 1.;
         highp vec4 pv = texture2D(uSampler, vTextureCoord);
-        if (pv.b != 0.0) {
+        highp vec4 material_paras = texture2D(uParameters, vTextureCoord);
+        if (material_paras.b != 0.0) {
                 highp float amplitude = pv.r;  // amplitude of field U
                 highp float derivative = pv.g;  // time derivative of field U
-                highp float speedindex = pv.b; // square of refractive index
+                highp float speedindex = material_paras.b; // square of refractive index
                 speedindex *= 1.5; // Unnecessary scale factor to correct unit mismatch, ensuring front-end light speed is accurately 299792458 m/s
                 highp float mid1 = getAmplitudeSquare(vec2(stepSizeX, 0.));
                 highp float mid2 = getAmplitudeSquare(vec2(-stepSizeX, 0.));
@@ -241,13 +247,13 @@
                 #else
                     highp float spatial_variance_factor = speedindex*(.25*(mid1+mid2+mid3+mid4)-amplitude); // standard laplace factor of scalar field U (* speedIndex factor)
                 #endif
-                dampingindex = pv.a; // 读取透明度通道中的 dampingindex
+                dampingindex = material_paras.a; // 读取透明度通道中的 dampingindex
                 newderivative = spatial_variance_factor+derivative*vDamping*dampingindex;
                 newamplitude = amplitude+newderivative;
                 // newamplitude = amplitude+spatial_variance_factor; // thermal conduct simulation
         }
         // update wave amplitude and derivative
-        gl_FragColor = vec4(newamplitude, newderivative, pv.b, pv.a);
+        gl_FragColor = vec4(newamplitude, newderivative, 1., 1.);
     }
 
     </script>
