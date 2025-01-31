@@ -235,13 +235,13 @@
                 highp float AvgSpeedIndexLeft = (speedindex+getSpeedSquare(vec2(-stepSizeX, 0.)))*0.5;
                 highp float AvgSpeedIndexUp = (speedindex+getSpeedSquare(vec2(0., stepSizeY)))*0.5;
                 highp float AvgSpeedIndexDown = (speedindex+getSpeedSquare(vec2(0., -stepSizeY)))*0.5;
-                highp float spatial_variance_factor =
-                AvgSpeedIndexRight*(mid1-amplitude)-AvgSpeedIndexLeft*(amplitude-mid2)+AvgSpeedIndexUp*(mid3-amplitude)-AvgSpeedIndexDown*(amplitude-mid4); // Spatial variance with speedIndex factor of electromagnetic field U
+                highp float spatial_variance_factor = .25*(
+                AvgSpeedIndexRight*(mid1-amplitude)-AvgSpeedIndexLeft*(amplitude-mid2)+AvgSpeedIndexUp*(mid3-amplitude)-AvgSpeedIndexDown*(amplitude-mid4)); // Spatial variance with speedIndex factor of electromagnetic field U
                 // highp float spatial_variance_factor = speedindex*(.25*(mid1+mid2+mid3+mid4)-amplitude); // standard laplace factor of scalar field U (* speedIndex factor)
                 dampingindex = pv.a; // 读取透明度通道中的 dampingindex
                 newderivative = spatial_variance_factor+derivative*vDamping*dampingindex;
-                newamplitude = amplitude+0.5*0.5*newderivative;
-                // newamplitude = amplitude+0.5*spatial_variance_factor; // thermal conduct simulation
+                newamplitude = amplitude+newderivative;
+                // newamplitude = amplitude+spatial_variance_factor; // thermal conduct simulation
         }
         // update wave amplitude and derivative
         gl_FragColor = vec4(newamplitude, newderivative, pv.b, pv.a);
