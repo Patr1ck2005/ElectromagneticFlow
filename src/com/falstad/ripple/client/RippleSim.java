@@ -115,6 +115,7 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
 	Choice setupChooser;
 	Choice colorChooser;
 	Choice waveChooser;
+	Choice theoryChooser;
 	Choice modeChooser;
 	Vector<Setup> setupList;
 	Vector<DragObject> dragObjects;
@@ -312,6 +313,10 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
 		this.acoustic = ac;
 	}-*/;
 
+	static native void setTheory(int ty) /*-{
+		this.theoryID = ty;
+	}-*/;
+
 	static native void set3dViewAngle(double angle1, double angle2) /*-{
 		this.set3dViewAngle(angle1, angle2);
 	}-*/;
@@ -487,6 +492,13 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
 		waveChooser.addChangeHandler(this);
         waveChooser.addStyleName("topSpace");
 
+		theoryChooser = new Choice();
+		theoryChooser.add("Equation 1");
+		theoryChooser.add("Equation 2");
+		theoryChooser.add("Equation 3");
+		theoryChooser.addChangeHandler(this);
+		theoryChooser.addStyleName("topSpace");
+
         modeChooser = new Choice();
         modeChooser.add("Mouse = Draw Wave (+)");
         modeChooser.add("Mouse = Draw Wave (-)");
@@ -498,6 +510,7 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
 //		verticalPanel.add(sourceChooser);
 		verticalPanel.add(modeChooser);
 		verticalPanel.add(waveChooser);
+		verticalPanel.add(theoryChooser);
 		verticalPanel.add(colorChooser);
 		verticalPanel.add(blankButton = new Button("Clear Waves"));
 		blankButton.addClickHandler(this);
@@ -1023,6 +1036,7 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
 				iterCount = 0;
 			int i;
 			setAcoustic(waveChooser.getSelectedIndex() == WAVE_SOUND);
+			setTheory(theoryChooser.getSelectedIndex());
 			for (i = 0; i != iterCount; i++) {
 				simulate();
 				t += timeStep;

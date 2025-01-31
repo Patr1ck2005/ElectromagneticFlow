@@ -45,7 +45,7 @@ var transform = [1, 0, 0, 1, 0, 0];
     }
 
 
-    var shaderProgramMain, shaderProgram3D, shaderProgramFixed, shaderProgramAcoustic, shaderProgramDraw, shaderProgramDrawLine, shaderProgramMode, shaderProgramPoke;
+    var shaderProgramMain, shaderProgram3D, shaderProgramDefault, shaderProgramSingletTE, shaderProgramAcoustic, shaderProgramDraw, shaderProgramDrawLine, shaderProgramMode, shaderProgramPoke;
 
     function initShader(fs, vs, prefix) {
         var fragmentShader = getShader(gl, fs, prefix);
@@ -86,9 +86,13 @@ var transform = [1, 0, 0, 1, 0, 0];
     	shaderProgram3D.colorsUniform = gl.getUniformLocation(shaderProgram3D, "colors");
     	shaderProgram3D.xOffsetUniform = gl.getUniformLocation(shaderProgram3D, "xOffset");
 
-    	shaderProgramFixed = initShader("shader-simulate-fs", "shader-vs", null);
-    	shaderProgramFixed.stepSizeXUniform = gl.getUniformLocation(shaderProgramFixed, "stepSizeX");
-    	shaderProgramFixed.stepSizeYUniform = gl.getUniformLocation(shaderProgramFixed, "stepSizeY");
+    	shaderProgramDefault = initShader("shader-simulate-fs", "shader-vs", null);
+    	shaderProgramDefault.stepSizeXUniform = gl.getUniformLocation(shaderProgramDefault, "stepSizeX");
+    	shaderProgramDefault.stepSizeYUniform = gl.getUniformLocation(shaderProgramDefault, "stepSizeY");
+
+        shaderProgramSingletTE = initShader("shader-simulate-fs", "shader-vs", "#define TE 1\n");
+        shaderProgramSingletTE.stepSizeXUniform = gl.getUniformLocation(shaderProgramSingletTE, "stepSizeX");
+        shaderProgramSingletTE.stepSizeYUniform = gl.getUniformLocation(shaderProgramSingletTE, "stepSizeY");
 
     	shaderProgramAcoustic = initShader("shader-simulate-fs", "shader-vs", "#define ACOUSTIC 1\n");
     	shaderProgramAcoustic.stepSizeXUniform = gl.getUniformLocation(shaderProgramAcoustic, "stepSizeX");
@@ -347,7 +351,13 @@ var transform = [1, 0, 0, 1, 0, 0];
     	var rttTexture = renderTexture1.texture;
         gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
 
-        var prog = sim.acoustic ? shaderProgramAcoustic : shaderProgramFixed;
+        if (sim.acoustic)
+            var prog = shaderProgramAcoustic;
+        else if (sim.theoryID === 0)
+            var prog = shaderProgramDefault;
+        else if (sim.theoryID === 1)
+            var prog = shaderProgramSingletTE;
+        // var prog = sim.acoustic ? shaderProgramAcoustic : shaderProgramDefault;
         gl.useProgram(prog);
         var rttFramebuffer = renderTexture1.framebuffer;
         gl.viewport(0, 0, rttFramebuffer.width, rttFramebuffer.height);
@@ -1112,6 +1122,7 @@ var transform = [1, 0, 0, 1, 0, 0];
 
 	sim.readPixelsWorks = false;
     	sim.acoustic = false;
+    	sim.theoryID = 0;
     	sim.updateRipple = function updateRipple (bright) { drawScene(bright); }
     	sim.updateRipple3D = function updateRipple3D (bright) { drawScene3D(bright); }
     	sim.simulate = function () { simulate(); }

@@ -231,13 +231,16 @@
                 highp float mid2 = getAmplitudeSquare(vec2(-stepSizeX, 0.));
                 highp float mid3 = getAmplitudeSquare(vec2(0., stepSizeY));
                 highp float mid4 = getAmplitudeSquare(vec2(0., -stepSizeY));
-                highp float AvgSpeedIndexRight = (speedindex+getSpeedSquare(vec2(stepSizeX, 0.)))*0.5;
-                highp float AvgSpeedIndexLeft = (speedindex+getSpeedSquare(vec2(-stepSizeX, 0.)))*0.5;
-                highp float AvgSpeedIndexUp = (speedindex+getSpeedSquare(vec2(0., stepSizeY)))*0.5;
-                highp float AvgSpeedIndexDown = (speedindex+getSpeedSquare(vec2(0., -stepSizeY)))*0.5;
-                highp float spatial_variance_factor = .25*(
-                AvgSpeedIndexRight*(mid1-amplitude)-AvgSpeedIndexLeft*(amplitude-mid2)+AvgSpeedIndexUp*(mid3-amplitude)-AvgSpeedIndexDown*(amplitude-mid4)); // Spatial variance with speedIndex factor of electromagnetic field U
-                // highp float spatial_variance_factor = speedindex*(.25*(mid1+mid2+mid3+mid4)-amplitude); // standard laplace factor of scalar field U (* speedIndex factor)
+                #ifdef TE
+                    highp float AvgSpeedIndexRight = (speedindex+getSpeedSquare(vec2(stepSizeX, 0.)))*0.5;
+                    highp float AvgSpeedIndexLeft = (speedindex+getSpeedSquare(vec2(-stepSizeX, 0.)))*0.5;
+                    highp float AvgSpeedIndexUp = (speedindex+getSpeedSquare(vec2(0., stepSizeY)))*0.5;
+                    highp float AvgSpeedIndexDown = (speedindex+getSpeedSquare(vec2(0., -stepSizeY)))*0.5;
+                    highp float spatial_variance_factor = .25*(
+                        AvgSpeedIndexRight*(mid1-amplitude)-AvgSpeedIndexLeft*(amplitude-mid2)+AvgSpeedIndexUp*(mid3-amplitude)-AvgSpeedIndexDown*(amplitude-mid4)); // Spatial variance with speedIndex factor of electromagnetic field U
+                #else
+                    highp float spatial_variance_factor = speedindex*(.25*(mid1+mid2+mid3+mid4)-amplitude); // standard laplace factor of scalar field U (* speedIndex factor)
+                #endif
                 dampingindex = pv.a; // 读取透明度通道中的 dampingindex
                 newderivative = spatial_variance_factor+derivative*vDamping*dampingindex;
                 newamplitude = amplitude+newderivative;
