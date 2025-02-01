@@ -1,14 +1,18 @@
-# ripplegl
+# ElectromagneticFlow
 
-This is my ripple project forked by pfalstad. This version of ripple will be more focused on Photonics Research as well as scientific education.
+ElectromagneticFlow is a wave solver designed for simulating various types of wave phenomena, with a particular focus on electromagnetic waves. The tool offers a high degree of interactivity, making it suitable for both educational and research purposes. The simulations are built to be physically accurate, providing a robust platform for exploring wave behaviors in different contexts.
 
-Ripple Tank, webgl version
+## Features
 
-## Introduction
+- **Multiple Simulation Methods**: Supports a variety of simulation techniques for solving wave equations, including both analytical and numerical approaches.
+- **Interactive Visualizations**: Real-time, interactive visualizations of electromagnetic waves and their interactions with different media and boundaries.
+- **Physically Accurate**: Designed with a focus on physical rigor to ensure reliable and precise results for educational and research applications.
+- **User-Friendly Interface**: Easy-to-use controls for adjusting simulation parameters, including wave sources, boundary conditions, and more.
 
-RippleGL is a ripple tank simulation that runs in the browser. It was originally written by me, Paul Falstad, as a Java Applet.  Then Iain Sharp adapted one of my other applets, a circuit simulator, to run in the browser using GWT.  So I used some of his code to build a similar port of the java ripple tank to GWT.  In the process, I also converted the simulation code to WebGL, for much better performance.
+## Use Cases
 
-For a hosted version of the application see http://www.falstad.com/ripple/
+- **Photonics Research**: Investigate wave propagation, interference, and diffraction in electromagnetic systems.
+- **Educational Tool**: Aimed at helping students and researchers build a deeper understanding of wave phenomena in physics.
 
 ## Building the web application
 
@@ -40,7 +44,7 @@ Just for reference the files should look like this
    +- examples (directory)
    +- setuplist.txt (index in to example directory)
 ```
-   
+
 ## Embedding
 
 You can link to the full page version of the application using the link shown above.
@@ -68,18 +72,11 @@ To build the Electron application:
 
 Thanks to @Immortalin for the initial work in applying Electron to CircuitJS1, which was then applied to Ripple.
 
+
 ## License
 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+This project is licensed under the GNU General Public License, version 2 or later.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+## Acknowledgements
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+I would like to express my gratitude to Paul Falstad for his original work on the Ripple Tank simulation, which laid the foundation for this project. His contributions have been invaluable, and this project builds upon his legacy to provide a more interactive and physically rigorous simulation tool.
