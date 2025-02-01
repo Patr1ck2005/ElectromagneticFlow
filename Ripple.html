@@ -1,0 +1,449 @@
+<!doctype html>
+<!-- The DOCTYPE declaration above will set the     -->
+<!-- browser's rendering engine into                -->
+<!-- "Standards Mode". Replacing this declaration   -->
+<!-- with a "Quirks Mode" doctype is not supported. -->
+
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+    <style>
+        .disabled {
+            color: lightgray
+        }
+
+        .topSpace {
+            margin-top: 12px;
+        }
+
+        .gwt-MenuItem-disabled {
+            color: lightgray;
+        }
+
+        .offScreen {
+            position: absolute;
+            right: 101%;
+            overflow: hidden;
+        }
+
+        .gwt-Frame {
+            scrolling = "no";
+            border: 0px !important;
+        }
+
+        .gwt-MenuItem {
+            font-size: 12px !important;
+        }
+
+        .gwt-MenuBar-horizontal {
+            font-size: 12px !important;
+        }
+
+        .gwt-Label-selected {
+            font-size: 1.3em;
+            font-weight: 700;
+            border-top: 1px solid black;
+            border-bottom: 1px solid black;
+        }
+
+        .gwt-Label-1off {
+            color: DarkGray;
+        }
+
+        .gwt-Label-2off {
+            font-size: 0.8em;
+            color: LightGray;
+        }
+
+        .gwt-Label-current {
+        }
+
+
+    </style>
+
+    <script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+    <script type="text/javascript" src="webgl-utils.js"></script>
+
+    <script id="shader-display-fs" type="x-shader/x-fragment">
+        #define TS_COL_WALL 0
+        #define TS_COL_POS 1
+        #define TS_COL_NEG 2
+        #define TS_COL_NEUTRAL 3
+        #define TS_COL_POS_MED 4
+        #define TS_COL_NEG_MED 5
+        #define TS_COL_MED 6
+        #define TS_COL_SOURCE 7
+        #define TS_COL_COUNT  9
+
+        precision highp float;
+
+        varying vec2 vTextureCoord;
+        varying vec4 vPosition;
+
+        uniform sampler2D uSampler;
+        uniform sampler2D uParameters; // 新增参数纹理
+
+        uniform float brightness;
+        uniform lowp vec3 colors[TS_COL_COUNT];
+
+        // shader for displaying waves on screen
+        void main(void) {
+        float alpha = 1.0;
+        vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+        vec4 materialColor = texture2D(uParameters, vec2(vTextureCoord.s, vTextureCoord.t));
+
+        // blue channel used to store walls/media
+		float med = materialColor.b;
+		vec3 col;
+		if (med == 0.0)
+			col = colors[TS_COL_WALL];
+		else {
+			// red channel used to store wave height
+			float r =  textureColor.r*brightness;
+			// float r =  (textureColor.r*textureColor.r+textureColor.b*textureColor.g*textureColor.g)*brightness; // render energy density
+	        r = clamp(r, -1., 1.);
+            if (r > 0.0)
+            	col = mix(mix(colors[TS_COL_MED], colors[TS_COL_NEUTRAL], med),
+                			mix(colors[TS_COL_POS_MED], colors[TS_COL_POS], med), r);
+            else
+                col = mix(mix(colors[TS_COL_MED], colors[TS_COL_NEUTRAL], med),
+                		    mix(colors[TS_COL_NEG_MED], colors[TS_COL_NEG], med), -r);
+		}
+        // read damping value from alpha channel (gray-scale representation of damping)
+        float damping = materialColor.a; // Damping value
+        // Adjust brightness based on damping value
+        col *= damping; // Reduce brightness proportionally to damping
+        gl_FragColor = vec4(col, 1.0); // Output the final color
+        }
+    </script>
+
+    <script id="shader-draw-fs" type="x-shader/x-fragment">
+        precision highp float;
+
+        //varying vec4 vPosition;
+        varying vec4 vColor;
+
+        void main(void) {
+            gl_FragColor = vColor;
+        }
+    </script>
+
+    <script id="shader-draw-vs" type="x-shader/x-vertex">
+        attribute vec3 aVertexPosition;
+        attribute vec4 aColor;
+
+        uniform mat4 uMVMatrix;
+        uniform mat4 uPMatrix;
+
+        varying vec4 vPosition;
+        varying vec4 vColor;
+
+        void main(void) {
+            vPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
+            gl_Position = uPMatrix * vPosition;
+            vColor = aColor;
+        }
+    </script>
+
+    <script id="shader-draw-line-fs" type="x-shader/x-fragment">
+        precision highp float;
+
+        //varying vec4 vPosition;
+        varying vec4 vColor;
+        uniform bool uEnableBlend;
+
+        void main(void) {
+            if (uEnableBlend) {
+                gl_FragColor = vec4(vColor.r * exp(-vColor.a * vColor.a), 0.0, 0.0, 0.0);
+            } else {
+                // 直接覆盖
+                gl_FragColor = vec4(vColor.r * exp(-vColor.a * vColor.a), 0.0, 0.0, 0.0);
+            }
+        }
+    </script>
+
+    <script id="shader-mode-fs" type="x-shader/x-fragment">
+        precision highp float;
+
+        varying vec4 vPosition;
+        varying vec4 vColor;
+
+        void main(void) {
+            // used to paint mode boxes
+            gl_FragColor = vec4(sin(vColor.r)*sin(vColor.g)+sin(vColor.b)*sin(vColor.a), 0., 0., 0.);
+        }
+    </script>
+
+    <script id="shader-simulate-fs" type="x-shader/x-fragment">
+        // shader for running simulation
+        precision highp float;
+
+        varying vec2 vTextureCoord;
+        varying vec4 vPosition;
+        varying float vDamping;
+
+        uniform sampler2D uSampler;
+        uniform sampler2D uParameters; // 新增参数纹理
+        uniform float stepSizeX;
+        uniform float stepSizeY;
+
+        // get wave amplitude for adjacent square, handling walls properly depending on acoustic flag
+        highp float getAmplitudeSquare(highp vec2 offset)
+        {
+            highp vec2 x = offset+vTextureCoord;
+
+            // periodical boundary condition
+            // if(x.x < 0.25) x.x += 0.5;
+            // if(x.x > 0.75) x.x -= 0.5;
+
+            highp vec4 pv = texture2D(uSampler, x);
+            highp vec4 material_paras = texture2D(uParameters, vTextureCoord);
+            if (material_paras.b != 0.0)
+               return pv.r;
+            #ifdef ACOUSTIC
+                return texture2D(uSampler, vTextureCoord-offset).r;
+            #else
+                return 0.0;
+            #endif
+        }
+
+        // get medium speedIndex for adjacent square, handling walls properly depending on acoustic flag
+        highp float getSpeedSquare(highp vec2 offset)
+        {
+            highp vec2 x = offset+vTextureCoord;
+
+            // periodical boundary condition
+            // if(x.x < 0.25) x.x += 0.5;
+            // if(x.x > 0.75) x.x -= 0.5;
+
+            highp vec4 material_paras = texture2D(uParameters, x);
+            return material_paras.b;
+        }
+
+    void main()
+    {
+        highp float newderivative = 0.;
+        highp float newamplitude = 0.;
+        highp float dampingindex = 1.;
+        highp vec4 pv = texture2D(uSampler, vTextureCoord);
+        highp vec4 material_paras = texture2D(uParameters, vTextureCoord);
+        if (material_paras.b != 0.0) {
+                highp float amplitude = pv.r;  // amplitude of field U
+                highp float derivative = pv.g;  // time derivative of field U
+                highp float speedindex = material_paras.b; // square of refractive index
+                speedindex *= 1.5; // Unnecessary scale factor to correct unit mismatch, ensuring front-end light speed is accurately 299792458 m/s
+                highp float mid1 = getAmplitudeSquare(vec2(stepSizeX, 0.));
+                highp float mid2 = getAmplitudeSquare(vec2(-stepSizeX, 0.));
+                highp float mid3 = getAmplitudeSquare(vec2(0., stepSizeY));
+                highp float mid4 = getAmplitudeSquare(vec2(0., -stepSizeY));
+                #ifdef TE
+                    highp float AvgSpeedIndexRight = (speedindex+getSpeedSquare(vec2(stepSizeX, 0.)))*0.5;
+                    highp float AvgSpeedIndexLeft = (speedindex+getSpeedSquare(vec2(-stepSizeX, 0.)))*0.5;
+                    highp float AvgSpeedIndexUp = (speedindex+getSpeedSquare(vec2(0., stepSizeY)))*0.5;
+                    highp float AvgSpeedIndexDown = (speedindex+getSpeedSquare(vec2(0., -stepSizeY)))*0.5;
+                    highp float spatial_variance_factor = .25*(
+                        AvgSpeedIndexRight*(mid1-amplitude)-AvgSpeedIndexLeft*(amplitude-mid2)+AvgSpeedIndexUp*(mid3-amplitude)-AvgSpeedIndexDown*(amplitude-mid4)); // Spatial variance with speedIndex factor of electromagnetic field U
+                #else
+                    highp float spatial_variance_factor = speedindex*(.25*(mid1+mid2+mid3+mid4)-amplitude); // standard laplace factor of scalar field U (* speedIndex factor)
+                #endif
+                dampingindex = material_paras.a; // 读取透明度通道中的 dampingindex
+                newderivative = spatial_variance_factor+derivative*vDamping*dampingindex;
+                newamplitude = amplitude+newderivative;
+                // newamplitude = amplitude+spatial_variance_factor; // thermal conduct simulation
+        }
+        // update wave amplitude and derivative
+        gl_FragColor = vec4(newamplitude, newderivative, 0., 0.);
+    }
+
+    </script>
+
+    <script id="shader-FDTD-fs" type="x-shader/x-fragment">
+        precision highp float;
+
+        varying vec2 vTextureCoord;
+        varying vec4 vPosition;
+        varying float vDamping;
+
+        uniform sampler2D uSampler;
+        uniform sampler2D uParameters;
+        uniform float stepSizeX;
+        uniform float stepSizeY;
+
+    void main()
+    {
+        highp vec4 material_paras = texture2D(uParameters, vTextureCoord);
+        highp float relative_epsilon = 1./material_paras.b;
+        highp float conductivity = 1.-material_paras.a+1.-vDamping;
+        highp float deltaTime = stepSizeX/1.414/1.5;
+        highp vec4 center_HzExEy = texture2D(uSampler, vTextureCoord);
+
+        if (material_paras.b != 0.0) {
+            vec2 coord_above = vTextureCoord + vec2(0.0, stepSizeY);
+            vec2 coord_below = vTextureCoord - vec2(0.0, stepSizeY);
+            vec2 coord_right = vTextureCoord + vec2(stepSizeX, 0.0);
+            vec2 coord_left = vTextureCoord - vec2(stepSizeX, 0.0);
+
+            vec4 above_HzExEy = texture2D(uSampler, coord_above);
+            vec4 below_HzExEy = texture2D(uSampler, coord_below);
+            vec4 right_HzExEy = texture2D(uSampler, coord_right);
+            vec4 left_HzExEy = texture2D(uSampler, coord_left);
+
+            if (center_HzExEy.a == 0.0) {
+                highp float CurveEz = (right_HzExEy.b-center_HzExEy.b)/stepSizeX-(above_HzExEy.g-center_HzExEy.g)/stepSizeY;
+                highp float new_Hz = center_HzExEy.r - deltaTime*CurveEz;
+                gl_FragColor = vec4(new_Hz, center_HzExEy.g, center_HzExEy.b, 0.5);
+            } else {
+                highp float CurveHx = (center_HzExEy.r-below_HzExEy.r)/stepSizeY;
+                highp float CurveHy = (center_HzExEy.r-left_HzExEy.r)/stepSizeX;
+                highp float Dx = relative_epsilon*center_HzExEy.g;
+                highp float Dy = relative_epsilon*center_HzExEy.b;
+                highp float new_Ex = (Dx + deltaTime*CurveHx - conductivity*center_HzExEy.g)/relative_epsilon;
+                highp float new_Ey = (Dy - deltaTime*CurveHy - conductivity*center_HzExEy.b)/relative_epsilon;
+                gl_FragColor = vec4(center_HzExEy.r, new_Ex, new_Ey, 0.0);
+            }
+        } else {
+            gl_FragColor = vec4(center_HzExEy.xyz, 0.0);
+        }
+    }
+    </script>
+
+    <script id="shader-poke-fs" type="x-shader/x-fragment">
+        precision highp float;
+
+        varying vec2 vTextureCoord;
+        varying vec4 vPosition;
+        varying float vDamping;
+
+        uniform sampler2D uSampler;
+        uniform vec2 pokePosition;
+        uniform float pokeValue;
+
+    void main()
+    {
+        highp float newvel = 0.;
+        highp float newpos = 0.;
+        highp vec4 pv = texture2D(uSampler, vTextureCoord);
+        highp float dist = length(vPosition.xy - pokePosition);
+        highp float fade = clamp(1.0-dist/0.01, 0.0, 1.0);
+        gl_FragColor = vec4(mix(pv.r, pokeValue, fade), mix(pv.g, 0.0, fade), pv.b, pv.a);
+    }
+
+    </script>
+
+    <script id="shader-vs" type="x-shader/x-vertex">
+        attribute vec3 aVertexPosition;
+        attribute vec2 aTextureCoord;
+        attribute float aDamping;
+
+        uniform mat4 uMVMatrix;
+        uniform mat4 uPMatrix;
+
+        varying vec2 vTextureCoord;
+        varying vec4 vPosition;
+        varying float vDamping;
+
+
+        void main(void) {
+            vPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
+            gl_Position = uPMatrix * vPosition;
+            vTextureCoord = aTextureCoord;
+        vDamping = sqrt(aDamping); // smoother the PML boundary condition
+        }
+    </script>
+
+    <script id="shader-3d-vs" type="x-shader/x-vertex">
+        #define TS_COL_WALL 0
+        #define TS_COL_POS 1
+        #define TS_COL_NEG 2
+
+        #define TS_COL_POS_MED 4
+        #define TS_COL_NEG_MED 5
+        #define TS_COL_MED 6
+        #define TS_COL_SOURCE 7
+        #define TS_COL_NEUTRAL 8
+        #define TS_COL_COUNT 9
+
+            attribute highp vec2 aTextureCoord;
+            uniform mat4 uMVMatrix;
+            uniform mat4 uPMatrix;
+            uniform highp float xOffset;
+
+            varying vec2 vTextureCoord;
+            varying vec4 vPosition;
+            varying vec4 vColor;
+            uniform sampler2D uSampler;
+            uniform float brightness;
+            uniform lowp vec3 colors[TS_COL_COUNT];
+
+            void main(void) {
+                highp vec2 tc  = vec2(aTextureCoord.x+xOffset, aTextureCoord.y);
+                vec4 pv = texture2D(uSampler, tc);
+                float r =  pv.r*brightness;
+                vPosition = uMVMatrix * vec4(-1.0+2.0*tc.x, -1.0+2.0*tc.y, r, 1.0);
+                gl_Position = uPMatrix * vPosition;
+                vTextureCoord = tc;
+                float med = pv.b;
+                vec3 col;
+                if (med == 0.0)
+                    col = colors[TS_COL_WALL];
+                else {
+                    // calculate normal
+                    float qx = texture2D(uSampler, vec2(aTextureCoord.x+xOffset+1./200., aTextureCoord.y)).r-pv.r;
+                    float qy = texture2D(uSampler, vec2(aTextureCoord.x+xOffset, aTextureCoord.y+1./200.)).r-pv.r;
+                    qx *= brightness;  qy *= brightness;
+
+                    // calculate lighting
+                    float normdot = (qx+qy+0.1)*(1./1.73)/length(vec3(qx, qy, 0.1));
+                    r = 40.*clamp(r, -1., 1.);
+                        if (r > 0.0)
+                                col = mix(mix(colors[TS_COL_MED], colors[TS_COL_NEUTRAL], med),
+                              mix(colors[TS_COL_POS_MED], colors[TS_COL_POS], med), r);
+                        else
+                                col = mix(mix(colors[TS_COL_MED], colors[TS_COL_NEUTRAL], med),
+                              mix(colors[TS_COL_NEG_MED], colors[TS_COL_NEG], med), -r);
+                    col = mix(col, vec3(1., 1., 1.), normdot);
+                }
+                vColor = vec4(col, 1.);
+
+            }
+    </script>
+
+    <!--                                                               -->
+    <!-- Consider inlining CSS to reduce the number of requested files -->
+    <!--                                                               -->
+    <link type="text/css" rel="stylesheet" href="Ripple.css">
+
+    <!--                                           -->
+    <!-- Any title is fine                         -->
+    <!--                                           -->
+    <title>Ripple Tank</title>
+
+    <script type="text/javascript" language="javascript" src="ripple.js"></script>
+
+    <!--                                           -->
+    <!-- This script loads your compiled module.   -->
+    <!-- If you add any GWT meta tags, they must   -->
+    <!-- be added before this line.                -->
+    <!--                                           -->
+    <script type="text/javascript" language="javascript" src="ripple/ripple.nocache.js"></script>
+</head>
+
+<!--                                           -->
+<!-- The body can have arbitrary html, or      -->
+<!-- you can leave the body empty if you want  -->
+<!-- to create a completely dynamic UI.        -->
+<!--                                           -->
+<body>
+
+<!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+<noscript>
+    <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Your web browser must have JavaScript enabled
+        in order for this application to display correctly.
+    </div>
+</noscript>
+</body>
+</html>
+
+
