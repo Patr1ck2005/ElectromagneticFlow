@@ -258,6 +258,34 @@
 
     </script>
 
+    <script id="shader-FDTD-fs" type="x-shader/x-fragment">
+        // shader for FDTD method of electromagnetic field
+        precision highp float;
+
+        varying vec2 vTextureCoord;
+        varying vec4 vPosition;
+        varying float vDamping;  // global damping effects. Not included in the Maxwell Equation
+
+        uniform sampler2D uSampler;
+        uniform sampler2D uParameters;
+        uniform float stepSizeX;
+        uniform float stepSizeY;
+
+    void main()
+    {
+        highp vec4 material_paras = texture2D(uParameters, vTextureCoord);
+        highp float relative_epsilon = 1./material_paras.b;
+        highp float conductivity = 1.-material_paras.a;
+        highp float deltaTime = 1.;
+        highp vec4 HzExEy = texture2D(uSampler, vTextureCoord); //Hz, Ex, Ey, 0. respectively
+        if (material_paras.b != 0.0) {
+        ...
+    }
+        gl_FragColor = ...;
+    }
+
+    </script>
+
     <script id="shader-poke-fs" type="x-shader/x-fragment">
         precision highp float;
 

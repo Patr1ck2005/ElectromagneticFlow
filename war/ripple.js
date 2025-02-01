@@ -45,7 +45,7 @@ var transform = [1, 0, 0, 1, 0, 0];
     }
 
 
-    var shaderProgramMain, shaderProgram3D, shaderProgramDefault, shaderProgramSingletTE, shaderProgramAcoustic, shaderProgramDraw, shaderProgramDrawLine, shaderProgramMode, shaderProgramPoke;
+    var shaderProgramMain, shaderProgram3D, shaderProgramDefault, shaderProgramSingletTE, shaderProgramAcoustic, shaderProgramEMFDTD, shaderProgramDraw, shaderProgramDrawLine, shaderProgramMode, shaderProgramPoke;
 
     function initShader(fs, vs, prefix) {
         var fragmentShader = getShader(gl, fs, prefix);
@@ -100,6 +100,10 @@ var transform = [1, 0, 0, 1, 0, 0];
     	shaderProgramAcoustic = initShader("shader-simulate-fs", "shader-vs", "#define ACOUSTIC 1\n");
     	shaderProgramAcoustic.stepSizeXUniform = gl.getUniformLocation(shaderProgramAcoustic, "stepSizeX");
     	shaderProgramAcoustic.stepSizeYUniform = gl.getUniformLocation(shaderProgramAcoustic, "stepSizeY");
+
+        shaderProgramEMFDTD = initShader("shader-FDTD-fs", "shader-vs", null);
+        shaderProgramEMFDTD.stepSizeXUniform = gl.getUniformLocation(shaderProgramEMFDTD, "stepSizeX");
+        shaderProgramEMFDTD.stepSizeYUniform = gl.getUniformLocation(shaderProgramEMFDTD, "stepSizeY");
 
     	shaderProgramDraw = initShader("shader-draw-fs", "shader-draw-vs");
     	shaderProgramDrawLine = initShader("shader-draw-line-fs", "shader-draw-vs", null);
@@ -389,6 +393,8 @@ var transform = [1, 0, 0, 1, 0, 0];
             var prog = shaderProgramDefault;
         else if (sim.theoryID === 1)
             var prog = shaderProgramSingletTE;
+        else if (sim.theoryID === 2)
+            var prog = shaderProgramEMFDTD;
         // var prog = sim.acoustic ? shaderProgramAcoustic : shaderProgramDefault;
         gl.useProgram(prog);
         var rttFramebuffer = renderTexture1.framebuffer;
