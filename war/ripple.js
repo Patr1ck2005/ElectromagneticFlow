@@ -377,14 +377,20 @@ var transform = [1, 0, 0, 1, 0, 0];
     var sourceBuffer;
     var colorBuffer;
     var colors;
-
+    // defined half_simulate function for dual-updating case when applying standard FDTD method for EM
     function simulate() {
-    	var rt = renderTexture1;
-    	renderTexture1 = renderTexture2;
-    	renderTexture2 = rt;
+        half_simulate();
+        if (sim.theoryID === 2||sim.theoryID === 3)
+            half_simulate();
+    }
 
-    	var rttFramebuffer = renderTexture1.framebuffer;
-    	var rttTexture = renderTexture1.texture;
+    function half_simulate() {
+        var rt = renderTexture1;
+        renderTexture1 = renderTexture2;
+        renderTexture2 = rt;
+
+        var rttFramebuffer = renderTexture1.framebuffer;
+        var rttTexture = renderTexture1.texture;
         gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
 
         if (sim.acoustic)
@@ -399,7 +405,7 @@ var transform = [1, 0, 0, 1, 0, 0];
         gl.useProgram(prog);
         var rttFramebuffer = renderTexture1.framebuffer;
         gl.viewport(0, 0, rttFramebuffer.width, rttFramebuffer.height);
-    	gl.clearColor(0.0, 0.0, 0.0, 0.0);
+        gl.clearColor(0.0, 0.0, 0.0, 0.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         mat4.identity(pMatrix);
@@ -976,7 +982,7 @@ var transform = [1, 0, 0, 1, 0, 0];
 		var rttFramebuffer = renderTexture1.framebuffer;
 		gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
 		gl.viewport(0, 0, rttFramebuffer.width, rttFramebuffer.height);
-		gl.colorMask(true, true, false, false);
+		gl.colorMask(true, true, true, false);
 //		gl.clear(gl.COLOR_BUFFER_BIT);
         gl.useProgram(shaderProgramMode);
         var z = 0;
@@ -1218,7 +1224,7 @@ var transform = [1, 0, 0, 1, 0, 0];
     		var rttFramebuffer = renderTexture1.framebuffer;
     		gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
     		gl.viewport(0, 0, rttFramebuffer.width, rttFramebuffer.height);
-    		gl.colorMask(true, true, false, false);
+    		gl.colorMask(true, true, true, false);
         	gl.clearColor(0.0, 0.0, 0.0, 0.0);
     		gl.clear(gl.COLOR_BUFFER_BIT);
     		gl.colorMask(true, true, true, true);

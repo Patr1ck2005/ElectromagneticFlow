@@ -493,9 +493,9 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
         waveChooser.addStyleName("topSpace");
 
 		theoryChooser = new Choice();
-		theoryChooser.add("Equation 1");
-		theoryChooser.add("Equation 2");
-		theoryChooser.add("Equation 3");
+		theoryChooser.add("Photonic Crystal -TM (scalar wave)");
+		theoryChooser.add("Photonic Crystal -TE (scalar wave)");
+		theoryChooser.add("Rigorous FDTD -TE");
 		theoryChooser.addChangeHandler(this);
 		theoryChooser.addStyleName("topSpace");
 
@@ -1980,13 +1980,21 @@ public class RippleSim implements MouseDownHandler, MouseMoveHandler,
 //			    cv.repaint();
 			    return;
 			}
-			if (event.getSource() == setupChooser)
-			    doSetup();
-			if (event.getSource() == colorChooser){
+			if (event.getSource() == setupChooser) {
+				doSetup();
+			}
+			if (event.getSource() == colorChooser) {
 			    doColor();
 			}
-			if (event.getSource() == waveChooser)
+			if (event.getSource() == waveChooser) {
 				setWaveType();
+			}
+			// clear wave and reset everything whenever the wave equation changes
+			if (event.getSource() == theoryChooser) {
+				doBlank();
+				reset();
+				resetTime();
+			}
 	}
 
     void pushUndo() {

@@ -158,7 +158,7 @@
                 gl_FragColor = vec4(vColor.r * exp(-vColor.a * vColor.a), 0.0, 0.0, 0.0);
             } else {
                 // 直接覆盖
-                gl_FragColor = vec4(vColor.r * exp(-vColor.a * vColor.a), 0.0, 1.0, 1.0);
+                gl_FragColor = vec4(vColor.r * exp(-vColor.a * vColor.a), 0.0, 0.0, 0.0);
             }
         }
     </script>
@@ -171,7 +171,7 @@
 
         void main(void) {
             // used to paint mode boxes
-            gl_FragColor = vec4(sin(vColor.r)*sin(vColor.g)+sin(vColor.b)*sin(vColor.a), 0., 0., 1.);
+            gl_FragColor = vec4(sin(vColor.r)*sin(vColor.g)+sin(vColor.b)*sin(vColor.a), 0., 0., 0.);
         }
     </script>
 
@@ -253,18 +253,17 @@
                 // newamplitude = amplitude+spatial_variance_factor; // thermal conduct simulation
         }
         // update wave amplitude and derivative
-        gl_FragColor = vec4(newamplitude, newderivative, 1., 1.);
+        gl_FragColor = vec4(newamplitude, newderivative, 0., 0.);
     }
 
     </script>
 
     <script id="shader-FDTD-fs" type="x-shader/x-fragment">
-        // shader for FDTD method of electromagnetic field
         precision highp float;
 
         varying vec2 vTextureCoord;
         varying vec4 vPosition;
-        varying float vDamping;  // global damping effects. Not included in the Maxwell Equation
+        varying float vDamping;
 
         uniform sampler2D uSampler;
         uniform sampler2D uParameters;
@@ -275,15 +274,38 @@
     {
         highp vec4 material_paras = texture2D(uParameters, vTextureCoord);
         highp float relative_epsilon = 1./material_paras.b;
-        highp float conductivity = 1.-material_paras.a;
-        highp float deltaTime = 1.;
-        highp vec4 HzExEy = texture2D(uSampler, vTextureCoord); //Hz, Ex, Ey, 0. respectively
-        if (material_paras.b != 0.0) {
-        ...
-    }
-        gl_FragColor = ...;
-    }
+        highp float conductivity = 1.-material_paras.a+1.-vDamping;
+        highp float deltaTime = stepSizeX/1.414/1.5;
+        highp vec4 center_HzExEy = texture2D(uSampler, vTextureCoord);
 
+        if (material_paras.b != 0.0) {
+            vec2 coord_above = vTextureCoord + vec2(0.0, stepSizeY);
+            vec2 coord_below = vTextureCoord - vec2(0.0, stepSizeY);
+            vec2 coord_right = vTextureCoord + vec2(stepSizeX, 0.0);
+            vec2 coord_left = vTextureCoord - vec2(stepSizeX, 0.0);
+
+            vec4 above_HzExEy = texture2D(uSampler, coord_above);
+            vec4 below_HzExEy = texture2D(uSampler, coord_below);
+            vec4 right_HzExEy = texture2D(uSampler, coord_right);
+            vec4 left_HzExEy = texture2D(uSampler, coord_left);
+
+            if (center_HzExEy.a == 0.0) {
+                highp float CurveEz = (right_HzExEy.b-center_HzExEy.b)/stepSizeX-(above_HzExEy.g-center_HzExEy.g)/stepSizeY;
+                highp float new_Hz = center_HzExEy.r - deltaTime*CurveEz;
+                gl_FragColor = vec4(new_Hz, center_HzExEy.g, center_HzExEy.b, 0.5);
+            } else {
+                highp float CurveHx = (center_HzExEy.r-below_HzExEy.r)/stepSizeY;
+                highp float CurveHy = (center_HzExEy.r-left_HzExEy.r)/stepSizeX;
+                highp float Dx = relative_epsilon*center_HzExEy.g;
+                highp float Dy = relative_epsilon*center_HzExEy.b;
+                highp float new_Ex = (Dx + deltaTime*CurveHx - conductivity*center_HzExEy.g)/relative_epsilon;
+                highp float new_Ey = (Dy - deltaTime*CurveHy - conductivity*center_HzExEy.b)/relative_epsilon;
+                gl_FragColor = vec4(center_HzExEy.r, new_Ex, new_Ey, 0.0);
+            }
+        } else {
+            gl_FragColor = vec4(center_HzExEy.xyz, 0.0);
+        }
+    }
     </script>
 
     <script id="shader-poke-fs" type="x-shader/x-fragment">
