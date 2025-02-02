@@ -81,8 +81,8 @@
         varying vec2 vTextureCoord;
         varying vec4 vPosition;
 
-        uniform sampler2D uSampler;
-        uniform sampler2D uParameters; // 新增参数纹理
+        uniform sampler2D fieldSampler;
+        uniform sampler2D materialParameters; // 新增参数纹理
 
         uniform float brightness;
         uniform lowp vec3 colors[TS_COL_COUNT];
@@ -90,8 +90,8 @@
         // shader for displaying waves on screen
         void main(void) {
         float alpha = 1.0;
-        vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-        vec4 materialColor = texture2D(uParameters, vec2(vTextureCoord.s, vTextureCoord.t));
+        vec4 textureColor = texture2D(fieldSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+        vec4 materialColor = texture2D(materialParameters, vec2(vTextureCoord.s, vTextureCoord.t));
 
         // blue channel used to store walls/media
 		float med = materialColor.b;
@@ -183,8 +183,8 @@
         varying vec4 vPosition;
         varying float vDamping;
 
-        uniform sampler2D uSampler;
-        uniform sampler2D uParameters; // 新增参数纹理
+        uniform sampler2D fieldSampler;
+        uniform sampler2D materialParameters; // 新增参数纹理
         uniform float stepSizeX;
         uniform float stepSizeY;
 
@@ -197,12 +197,12 @@
             // if(x.x < 0.25) x.x += 0.5;
             // if(x.x > 0.75) x.x -= 0.5;
 
-            highp vec4 pv = texture2D(uSampler, x);
-            highp vec4 material_paras = texture2D(uParameters, vTextureCoord);
+            highp vec4 pv = texture2D(fieldSampler, x);
+            highp vec4 material_paras = texture2D(materialParameters, vTextureCoord);
             if (material_paras.b != 0.0)
                return pv.r;
             #ifdef ACOUSTIC
-                return texture2D(uSampler, vTextureCoord-offset).r;
+                return texture2D(fieldSampler, vTextureCoord-offset).r;
             #else
                 return 0.0;
             #endif
@@ -217,7 +217,7 @@
             // if(x.x < 0.25) x.x += 0.5;
             // if(x.x > 0.75) x.x -= 0.5;
 
-            highp vec4 material_paras = texture2D(uParameters, x);
+            highp vec4 material_paras = texture2D(materialParameters, x);
             return material_paras.b;
         }
 
@@ -226,8 +226,8 @@
         highp float newderivative = 0.;
         highp float newamplitude = 0.;
         highp float dampingindex = 1.;
-        highp vec4 pv = texture2D(uSampler, vTextureCoord);
-        highp vec4 material_paras = texture2D(uParameters, vTextureCoord);
+        highp vec4 pv = texture2D(fieldSampler, vTextureCoord);
+        highp vec4 material_paras = texture2D(materialParameters, vTextureCoord);
         if (material_paras.b != 0.0) {
                 highp float amplitude = pv.r;  // amplitude of field U
                 highp float derivative = pv.g;  // time derivative of field U
@@ -265,18 +265,18 @@
         varying vec4 vPosition;
         varying float vDamping;
 
-        uniform sampler2D uSampler;
-        uniform sampler2D uParameters;
+        uniform sampler2D fieldSampler;
+        uniform sampler2D materialParameters;
         uniform float stepSizeX;
         uniform float stepSizeY;
 
     void main()
     {
-        highp vec4 material_paras = texture2D(uParameters, vTextureCoord);
+        highp vec4 material_paras = texture2D(materialParameters, vTextureCoord);
         highp float relative_epsilon = 1./material_paras.b;
         highp float conductivity = 1.-material_paras.a+1.-vDamping;
         highp float deltaTime = stepSizeX/1.414/1.5;
-        highp vec4 center_HzExEy = texture2D(uSampler, vTextureCoord);
+        highp vec4 center_HzExEy = texture2D(fieldSampler, vTextureCoord);
 
         if (material_paras.b != 0.0) {
             vec2 coord_above = vTextureCoord + vec2(0.0, stepSizeY);
@@ -284,10 +284,10 @@
             vec2 coord_right = vTextureCoord + vec2(stepSizeX, 0.0);
             vec2 coord_left = vTextureCoord - vec2(stepSizeX, 0.0);
 
-            vec4 above_HzExEy = texture2D(uSampler, coord_above);
-            vec4 below_HzExEy = texture2D(uSampler, coord_below);
-            vec4 right_HzExEy = texture2D(uSampler, coord_right);
-            vec4 left_HzExEy = texture2D(uSampler, coord_left);
+            vec4 above_HzExEy = texture2D(fieldSampler, coord_above);
+            vec4 below_HzExEy = texture2D(fieldSampler, coord_below);
+            vec4 right_HzExEy = texture2D(fieldSampler, coord_right);
+            vec4 left_HzExEy = texture2D(fieldSampler, coord_left);
 
             if (center_HzExEy.a == 0.0) {
                 highp float CurveEz = (right_HzExEy.b-center_HzExEy.b)/stepSizeX-(above_HzExEy.g-center_HzExEy.g)/stepSizeY;
@@ -308,6 +308,126 @@
     }
     </script>
 
+    <script id="shader-FDTD-Magnet-fs" type="x-shader/x-fragment">
+        precision highp float;
+
+        varying vec2 vTextureCoord;
+        varying vec4 vPosition;
+        varying float vDamping;
+
+        uniform sampler2D electricSampler;
+        uniform sampler2D magneticSampler;
+        uniform sampler2D materialParameters;
+        uniform float stepSizeX;
+        uniform float stepSizeY;
+
+    void main()
+    {
+        highp vec4 material_paras = texture2D(materialParameters, vTextureCoord);
+        highp float relative_epsilon = 1./material_paras.b;
+        highp float conductivity = 1.-material_paras.a+1.-vDamping;
+        highp float deltaTime = stepSizeX/1.414/1.5;
+        highp vec4 center_ExEy = texture2D(electricSampler, vTextureCoord);
+        highp vec4 center_Hz = texture2D(magneticSampler, vTextureCoord);
+
+        if (material_paras.b != 0.0) {
+            vec2 coord_above = vTextureCoord + vec2(0.0, stepSizeY);
+            vec2 coord_below = vTextureCoord - vec2(0.0, stepSizeY);
+            vec2 coord_right = vTextureCoord + vec2(stepSizeX, 0.0);
+            vec2 coord_left = vTextureCoord - vec2(stepSizeX, 0.0);
+
+            vec4 above_ExEy = texture2D(electricSampler, coord_above);
+            vec4 right_ExEy = texture2D(electricSampler, coord_right);
+
+            highp float CurveEz = (right_ExEy.g-center_ExEy.g)/stepSizeX-(above_ExEy.r-center_ExEy.r)/stepSizeY;
+            highp float new_Hz = center_Hz.r - deltaTime*CurveEz;
+            gl_FragColor = vec4(new_Hz, 0., 0., 0.);
+        } else {
+            gl_FragColor = vec4(center_Hz.r, 0., 0., 0.);
+        }
+    }
+    </script>
+
+    <script id="shader-FDTD-Electron-fs" type="x-shader/x-fragment">
+        precision highp float;
+
+        varying vec2 vTextureCoord;
+        varying vec4 vPosition;
+        varying float vDamping;
+
+        uniform sampler2D electricSampler;
+        uniform sampler2D magneticSampler;
+        uniform sampler2D polarSampler;
+        uniform sampler2D materialParameters;
+        uniform float stepSizeX;
+        uniform float stepSizeY;
+
+    void main()
+    {
+        highp vec4 material_paras = texture2D(materialParameters, vTextureCoord);
+        highp float relative_epsilon = 1./material_paras.b;
+        highp float conductivity = 1.-material_paras.a+1.-vDamping;
+        highp float deltaTime = stepSizeX/1.414/1.5;
+        highp vec4 center_ExEy = texture2D(electricSampler, vTextureCoord);
+        highp vec4 center_Hz = texture2D(magneticSampler, vTextureCoord);
+        highp vec4 JxJyPxPy = texture2D(polarSampler, vTextureCoord);
+
+        if (material_paras.b != 0.0) {
+            vec2 coord_above = vTextureCoord + vec2(0.0, stepSizeY);
+            vec2 coord_below = vTextureCoord - vec2(0.0, stepSizeY);
+            vec2 coord_right = vTextureCoord + vec2(stepSizeX, 0.0);
+            vec2 coord_left = vTextureCoord - vec2(stepSizeX, 0.0);
+
+            vec4 below_Hz = texture2D(magneticSampler, coord_below);
+            vec4 left_Hz = texture2D(magneticSampler, coord_left);
+
+            highp float CurveHx = (center_Hz.r-below_Hz.r)/stepSizeY;
+            highp float CurveHy = (center_Hz.r-left_Hz.r)/stepSizeX;
+            highp float Dx = relative_epsilon*center_ExEy.r;
+            highp float Dy = relative_epsilon*center_ExEy.g;
+            highp float new_Ex = (Dx + deltaTime*CurveHx - JxJyPxPy.r - (1.-vDamping)*center_ExEy.r)/relative_epsilon;
+            highp float new_Ey = (Dy - deltaTime*CurveHy - JxJyPxPy.g - (1.-vDamping)*center_ExEy.g)/relative_epsilon;
+            gl_FragColor = vec4(new_Ex, new_Ey, 0., 0.);
+        } else {
+            gl_FragColor = vec4(center_ExEy.xy, 0., 0.);
+        }
+    }
+    </script>
+
+    <script id="shader-FDTD-Polar-fs" type="x-shader/x-fragment">
+        precision highp float;
+
+        varying vec2 vTextureCoord;
+        varying vec4 vPosition;
+        varying float vDamping;
+
+        uniform sampler2D polarSampler;
+        uniform sampler2D electricSampler;
+        uniform sampler2D materialParameters;
+        uniform float stepSizeX;
+        uniform float stepSizeY;
+
+    void main()
+    {
+        highp vec4 material_paras = texture2D(materialParameters, vTextureCoord);
+        highp float gamma = material_paras.g;
+        highp float relative_epsilon = 1./material_paras.b;
+        highp float conductivity = 1.-material_paras.a;
+        highp float deltaTime = stepSizeX/1.414/1.5;
+        highp vec4 ExEy = texture2D(electricSampler, vTextureCoord);
+        highp vec4 JxJyPxPy = texture2D(polarSampler, vTextureCoord);
+
+        if (material_paras.b != 0.0) {
+            highp float new_Jx = (1.-.5*gamma*deltaTime)/(1.+.5*gamma*deltaTime)*JxJyPxPy.r+conductivity*ExEy.r/(1.+.5*gamma*deltaTime);
+            highp float new_Jy = (1.-.5*gamma*deltaTime)/(1.+.5*gamma*deltaTime)*JxJyPxPy.g+conductivity*ExEy.g/(1.+.5*gamma*deltaTime);
+            gl_FragColor = vec4(new_Jx, new_Jy, 0., 0.);
+        } else {
+            gl_FragColor = JxJyPxPy;
+        }
+    }
+    </script>
+
+
     <script id="shader-poke-fs" type="x-shader/x-fragment">
         precision highp float;
 
@@ -315,7 +435,7 @@
         varying vec4 vPosition;
         varying float vDamping;
 
-        uniform sampler2D uSampler;
+        uniform sampler2D fieldSampler;
         uniform vec2 pokePosition;
         uniform float pokeValue;
 
@@ -323,7 +443,7 @@
     {
         highp float newvel = 0.;
         highp float newpos = 0.;
-        highp vec4 pv = texture2D(uSampler, vTextureCoord);
+        highp vec4 pv = texture2D(fieldSampler, vTextureCoord);
         highp float dist = length(vPosition.xy - pokePosition);
         highp float fade = clamp(1.0-dist/0.01, 0.0, 1.0);
         gl_FragColor = vec4(mix(pv.r, pokeValue, fade), mix(pv.g, 0.0, fade), pv.b, pv.a);
@@ -372,25 +492,27 @@
             varying vec2 vTextureCoord;
             varying vec4 vPosition;
             varying vec4 vColor;
-            uniform sampler2D uSampler;
+            uniform sampler2D fieldSampler;
+            uniform sampler2D materialParameters;
             uniform float brightness;
             uniform lowp vec3 colors[TS_COL_COUNT];
 
             void main(void) {
                 highp vec2 tc  = vec2(aTextureCoord.x+xOffset, aTextureCoord.y);
-                vec4 pv = texture2D(uSampler, tc);
+                vec4 pv = texture2D(fieldSampler, tc);
+                vec4 material_paras = texture2D(materialParameters, tc);
                 float r =  pv.r*brightness;
                 vPosition = uMVMatrix * vec4(-1.0+2.0*tc.x, -1.0+2.0*tc.y, r, 1.0);
                 gl_Position = uPMatrix * vPosition;
                 vTextureCoord = tc;
-                float med = pv.b;
+                float med = material_paras.b;
                 vec3 col;
                 if (med == 0.0)
                     col = colors[TS_COL_WALL];
                 else {
                     // calculate normal
-                    float qx = texture2D(uSampler, vec2(aTextureCoord.x+xOffset+1./200., aTextureCoord.y)).r-pv.r;
-                    float qy = texture2D(uSampler, vec2(aTextureCoord.x+xOffset, aTextureCoord.y+1./200.)).r-pv.r;
+                    float qx = texture2D(fieldSampler, vec2(aTextureCoord.x+xOffset+1./200., aTextureCoord.y)).r-pv.r;
+                    float qy = texture2D(fieldSampler, vec2(aTextureCoord.x+xOffset, aTextureCoord.y+1./200.)).r-pv.r;
                     qx *= brightness;  qy *= brightness;
 
                     // calculate lighting
